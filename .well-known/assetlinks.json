@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.vinayismd.messagehunt",
+      "sha256_cert_fingerprints": [
+        "CA:E1:CE:71:49:E2:21:A8:B2:1B:3E:9C:0B:79:8B:DF:FA:D9:06:96:0D:FD:DB:0F:98:F6:C8:45:23:C8:26:85"
+      ]
+    }
+  }
+]
