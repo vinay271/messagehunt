@@ -112,11 +112,9 @@
         const params = new URLSearchParams(window.location.search);
         const challengeId = params.get('id');
 
-        // Deep link using custom scheme
+        // Custom scheme deep link — directly opens the app
         const customSchemeUrl = `mshunt://challenge?id=${challengeId}`;
-        // Intent URL for Android (opens app or falls back to Play Store)
-        const intentUrl = `intent://challenge?id=${challengeId}#Intent;scheme=mshunt;package=com.vinayismd.messagehunt;end`;
-        // Play Store fallback (update this once your app is published)
+        // Play Store fallback (update once your app is published)
         const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.vinayismd.messagehunt';
 
         const openBtn = document.getElementById('openBtn');
@@ -125,12 +123,22 @@
         const isAndroid = /android/i.test(navigator.userAgent);
         const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
+        function tryOpenApp() {
+            // Try opening via custom scheme
+            window.location.href = customSchemeUrl;
+
+            // If app didn't open (page still visible after 2s), show fallback
+            setTimeout(() => {
+                if (!document.hidden) {
+                    status.innerHTML = 'App not found. <a href="' + playStoreUrl + '" style="color:#ff6b35;text-decoration:underline;">Get it on Play Store</a>';
+                }
+            }, 2000);
+        }
+
         if (isAndroid) {
-            openBtn.href = intentUrl;
-            // Auto-try opening the app
-            setTimeout(() => { window.location.href = customSchemeUrl; }, 100);
+            // Auto-try opening the app on page load
+            setTimeout(tryOpenApp, 300);
         } else if (isIOS) {
-            openBtn.href = customSchemeUrl;
             status.textContent = 'iOS app coming soon';
         } else {
             openBtn.href = playStoreUrl;
@@ -139,17 +147,8 @@
         }
 
         openBtn.addEventListener('click', function(e) {
-            if (isAndroid) return; // Intent URL handles everything
-
             e.preventDefault();
-            window.location.href = customSchemeUrl;
-
-            setTimeout(() => {
-                if (!document.hidden) {
-                    status.textContent = "App not installed? Redirecting to store...";
-                    setTimeout(() => { window.location.href = playStoreUrl; }, 1000);
-                }
-            }, 1500);
+            tryOpenApp();
         });
     </script>
 </body>
