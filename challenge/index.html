@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MessageHunt - Secret Challenge</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #fff;
+            padding: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 48px 36px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            animation: fadeUp 0.6s ease-out;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .emoji { font-size: 64px; margin-bottom: 16px; }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #ff6b35, #f7c948);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.65);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .open-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ff6b35, #e55a2b);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.35);
+        }
+
+        .open-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(255, 107, 53, 0.5);
+        }
+
+        .store-link {
+            display: inline-block;
+            margin-top: 16px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .store-link:hover { color: rgba(255, 255, 255, 0.8); }
+
+        .status {
+            margin-top: 20px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="emoji">🤫</div>
+        <h1>Someone hid a secret for you!</h1>
+        <p class="subtitle">
+            A mystery challenge is waiting for you on MessageHunt.<br>
+            Open the app to discover it.
+        </p>
+        <a id="openBtn" class="open-btn" href="#">Open in MessageHunt</a>
+        <p class="status" id="status"></p>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const challengeId = params.get('id');
+
+        // Deep link using custom scheme
+        const customSchemeUrl = `mshunt://challenge?id=${challengeId}`;
+        // Intent URL for Android (opens app or falls back to Play Store)
+        const intentUrl = `intent://challenge?id=${challengeId}#Intent;scheme=mshunt;package=com.vinayismd.messagehunt;end`;
+        // Play Store fallback (update this once your app is published)
+        const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.vinayismd.messagehunt';
+
+        const openBtn = document.getElementById('openBtn');
+        const status = document.getElementById('status');
+
+        const isAndroid = /android/i.test(navigator.userAgent);
+        const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+        if (isAndroid) {
+            openBtn.href = intentUrl;
+            // Auto-try opening the app
+            setTimeout(() => { window.location.href = customSchemeUrl; }, 100);
+        } else if (isIOS) {
+            openBtn.href = customSchemeUrl;
+            status.textContent = 'iOS app coming soon';
+        } else {
+            openBtn.href = playStoreUrl;
+            openBtn.textContent = 'Get MessageHunt on Android';
+            status.textContent = 'Available on Android';
+        }
+
+        openBtn.addEventListener('click', function(e) {
+            if (isAndroid) return; // Intent URL handles everything
+
+            e.preventDefault();
+            window.location.href = customSchemeUrl;
+
+            setTimeout(() => {
+                if (!document.hidden) {
+                    status.textContent = "App not installed? Redirecting to store...";
+                    setTimeout(() => { window.location.href = playStoreUrl; }, 1000);
+                }
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
