@@ -126,24 +126,7 @@
                     Sign in with Google
                 </button>
 
-                <button id="demoLoginBtn" class="demo-btn">
-                    <i data-lucide="sparkles" style="width: 18px; height: 18px; color: var(--accent-bright);"></i>
-                    Quick Creator Access (Demo Login)
-                </button>
-
-                <div class="mt-4 p-3 text-start rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.15); font-size: 0.8rem;">
-                    <strong class="text-warning d-block mb-1">
-                        <i data-lucide="info" style="width:14px; height:14px;"></i> Seeing "redirect_uri_mismatch"?
-                    </strong>
-                    <span class="text-muted">
-                        Add this URI to <strong>Google Cloud Console → Credentials → Authorized Redirect URIs</strong>:
-                    </span>
-                    <code class="d-block text-accent my-1 p-1 rounded" style="background: rgba(0,0,0,0.3); font-size:0.75rem; word-break: break-all;">
-                        https://ngtlkwuuoojbhjjeawag.supabase.co/auth/v1/callback
-                    </code>
-                </div>
-
-                <a href="index.html" class="d-block mt-3 text-decoration-none small text-muted">
+                <a href="index.html" class="d-block mt-4 text-decoration-none small text-muted">
                     ← Back to Product Home
                 </a>
             </div>
@@ -157,12 +140,9 @@
         const supabaseClient = supabase.createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_ANON_KEY);
 
         function getRedirectUrl() {
-            // Google OAuth does not accept file:// URIs.
-            // If running on http/https (e.g. localhost or hosted server), construct origin URL.
             if (window.location.protocol.startsWith('http')) {
                 return window.location.origin + window.location.pathname.replace('login.html', 'dashboard.html');
             }
-            // For file:// protocol, return undefined so Supabase defaults to configured Site URL
             return undefined;
         }
 
@@ -180,39 +160,22 @@
 
                 if (error) {
                     console.error('Supabase OAuth error:', error);
-                    alert('Google Sign-In Error: ' + error.message + '\n\nFalling back to Quick Creator Access.');
-                    loginDemoUser();
+                    alert('Google Sign-In Error: ' + error.message);
                 }
             } catch (err) {
                 console.error('Google Sign In Exception:', err);
-                loginDemoUser();
+                alert('Google Sign-In Exception: ' + err.message);
             }
         }
 
-        function loginDemoUser() {
-            localStorage.setItem('demo_user_session', JSON.stringify({
-                id: 'demo-creator-uid',
-                name: 'Business Creator',
-                email: 'creator@business.com',
-                photo_url: 'https://i.pravatar.cc/150?u=creator',
-                reward_points: 25000
-            }));
-            window.location.href = 'dashboard.html';
-        }
-
         document.getElementById('googleSignInBtn').addEventListener('click', signInWithGoogle);
-        document.getElementById('demoLoginBtn').addEventListener('click', loginDemoUser);
 
-        // Auto redirect if session exists
-        if (localStorage.getItem('demo_user_session')) {
-            window.location.href = 'dashboard.html';
-        } else {
-            supabaseClient.auth.getSession().then(({ data: { session } }) => {
-                if (session) {
-                    window.location.href = 'dashboard.html';
-                }
-            });
-        }
+        // Auto redirect if active Supabase session exists
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                window.location.href = 'dashboard.html';
+            }
+        });
     </script>
 </body>
 

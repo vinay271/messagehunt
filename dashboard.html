@@ -516,19 +516,6 @@
                 console.log('No active Supabase OAuth session:', e);
             }
 
-            const demoSessionRaw = localStorage.getItem('demo_user_session');
-            if (demoSessionRaw) {
-                try {
-                    const demoSession = JSON.parse(demoSessionRaw);
-                    document.body.style.display = 'flex';
-                    window.currentUserEmail = demoSession.email;
-                    updateUI(demoSession.name, demoSession.photo_url, demoSession.reward_points);
-                    return;
-                } catch (e) {
-                    console.error('Error parsing demo session:', e);
-                }
-            }
-
             window.location.href = 'login.html';
         }
 
