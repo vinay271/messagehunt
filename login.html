@@ -105,9 +105,40 @@
             border-color: var(--primary-bright);
         }
 
-        .subtitle {
-            color: var(--text-muted);
+        .auth-error-banner {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #fca5a5;
+        }
+
+        .auth-error-title {
+            color: #ef4444;
+            font-weight: 700;
             font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .auth-error-steps {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-top: 10px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .auth-error-steps code {
+            color: var(--accent-bright);
+            word-break: break-all;
         }
     </style>
 </head>
@@ -119,6 +150,8 @@
                 <img src="ic_launcher.png" alt="MessageHunt Icon" width="64" height="64" class="rounded-3 mb-3 shadow-lg">
                 <div class="brand-logo gradient-text-purple">CREATOR PORTAL</div>
                 <p class="subtitle mb-2">Sign in to buy coins and promote your brand with location drops across India</p>
+
+                <div id="authErrorAlert" class="auth-error-banner d-none"></div>
 
                 <button id="googleSignInBtn" class="google-btn">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
@@ -140,11 +173,53 @@
         lucide.createIcons();
         const supabaseClient = supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
 
+        function checkAuthErrorInUrl() {
+            const searchParams = new URLSearchParams(window.location.search);
+            const hashString = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : window.location.hash;
+            const hashParams = new URLSearchParams(hashString);
+
+            const error = searchParams.get('error') || hashParams.get('error');
+            const errorDescription = searchParams.get('error_description') || hashParams.get('error_description');
+
+            if (error || errorDescription) {
+                const alertEl = document.getElementById('authErrorAlert');
+                if (!alertEl) return;
+
+                const decodedDesc = decodeURIComponent(errorDescription || error || 'Google sign in failed');
+                
+                let troubleshootingHtml = '';
+                if (decodedDesc.includes('Unable to exchange external code') || decodedDesc.includes('4/0A')) {
+                    troubleshootingHtml = `
+                        <div class="auth-error-steps">
+                            <strong>How to resolve in Supabase & Google Cloud:</strong>
+                            <ol class="ps-3 mb-0 mt-1">
+                                <li>Verify Google <em>Client Secret</em> in <strong>Supabase Dashboard &rarr; Auth &rarr; Providers &rarr; Google</strong></li>
+                                <li>Set Authorized Redirect URI in <strong>Google Cloud Console</strong>: <code>${config.SUPABASE_URL}/auth/v1/callback</code></li>
+                                <li>Add <code>${window.location.origin}/dashboard.html</code> to <strong>Supabase Auth Redirect URLs</strong>.</li>
+                            </ol>
+                        </div>
+                    `;
+                }
+
+                alertEl.innerHTML = `
+                    <div class="auth-error-title">
+                        <i data-lucide="alert-triangle" style="width:18px;height:18px;"></i>
+                        Authentication Failed
+                    </div>
+                    <div>${decodedDesc}</div>
+                    ${troubleshootingHtml}
+                `;
+                alertEl.classList.remove('d-none');
+                lucide.createIcons();
+            }
+        }
+
         async function signInWithGoogle() {
+            const redirectUrl = window.location.origin + window.location.pathname.replace('login.html', '') + 'dashboard.html';
             const { data, error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin + '/dashboard.html'
+                    redirectTo: redirectUrl
                 }
             });
 
@@ -155,6 +230,7 @@
         }
 
         document.getElementById('googleSignInBtn').addEventListener('click', signInWithGoogle);
+        checkAuthErrorInUrl();
 
         // Check for existing session
         supabaseClient.auth.onAuthStateChange((event, session) => {

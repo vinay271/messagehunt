@@ -502,8 +502,31 @@
             window.prepareEmailRequest(`Custom Pack (${customPoints.toLocaleString()} PTS)`, customPoints);
         };
 
+        // Check for OAuth error in URL (query string or hash)
+        function checkOAuthErrors() {
+            const searchParams = new URLSearchParams(window.location.search);
+            const hashString = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : window.location.hash;
+            const hashParams = new URLSearchParams(hashString);
+
+            const error = searchParams.get('error') || hashParams.get('error');
+            const errorCode = searchParams.get('error_code') || hashParams.get('error_code');
+            const errorDescription = searchParams.get('error_description') || hashParams.get('error_description');
+
+            if (error || errorDescription) {
+                const targetUrl = new URL('login.html', window.location.origin + window.location.pathname.replace('dashboard.html', ''));
+                if (error) targetUrl.searchParams.set('error', error);
+                if (errorCode) targetUrl.searchParams.set('error_code', errorCode);
+                if (errorDescription) targetUrl.searchParams.set('error_description', errorDescription);
+                window.location.href = targetUrl.toString();
+                return true;
+            }
+            return false;
+        }
+
         // User session guard & profile synchronization
         async function checkSession() {
+            if (checkOAuthErrors()) return;
+
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
@@ -520,26 +543,41 @@
         }
 
         async function syncUserProfile(authUser) {
-            const { data: existingUser, error: fetchError } = await supabaseClient
-                .from('users')
-                .select('name, photo_url, reward_points')
-                .eq('uuid', authUser.id)
-                .single();
+            const metaName = authUser.user_metadata?.full_name || authUser.user_metadata?.name || (authUser.email ? authUser.email.split('@')[0] : 'Creator');
+            const metaPhoto = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || ('https://i.pravatar.cc/150?u=' + authUser.id);
+            
+            let displayName = metaName;
+            let photoUrl = metaPhoto;
+            let rewardPoints = 25000;
 
-            if (existingUser) {
-                updateUI(existingUser.name, existingUser.photo_url, existingUser.reward_points);
-            } else {
-                const newUser = {
-                    uuid: authUser.id,
-                    name: authUser.user_metadata.full_name || authUser.email.split('@')[0],
-                    email: authUser.email,
-                    photo_url: authUser.user_metadata.avatar_url,
-                    reward_points: 25000 // Creator welcome balance
-                };
+            try {
+                const { data: existingUser, error: fetchError } = await supabaseClient
+                    .from('users')
+                    .select('name, photo_url, reward_points')
+                    .eq('uuid', authUser.id)
+                    .maybeSingle();
 
-                await supabaseClient.from('users').insert([newUser]);
-                updateUI(newUser.name, newUser.photo_url, newUser.reward_points);
+                if (existingUser) {
+                    if (existingUser.name) displayName = existingUser.name;
+                    if (existingUser.photo_url) photoUrl = existingUser.photo_url;
+                    if (existingUser.reward_points !== undefined && existingUser.reward_points !== null) {
+                        rewardPoints = existingUser.reward_points;
+                    }
+                } else {
+                    const newUser = {
+                        uuid: authUser.id,
+                        name: metaName,
+                        email: authUser.email || '',
+                        photo_url: metaPhoto,
+                        reward_points: rewardPoints
+                    };
+                    await supabaseClient.from('users').upsert([newUser], { onConflict: 'uuid' });
+                }
+            } catch (err) {
+                console.warn('Failed to sync profile with database:', err);
             }
+
+            updateUI(displayName, photoUrl, rewardPoints);
         }
 
         function updateUI(name, photoUrl, points) {
@@ -549,7 +587,7 @@
 
             if (name && nameEl) nameEl.textContent = name;
             if (photoUrl && photoEl) photoEl.src = photoUrl;
-            if (points !== undefined && pointsEl) pointsEl.textContent = points.toLocaleString();
+            if (points !== undefined && pointsEl) pointsEl.textContent = Number(points).toLocaleString();
         }
 
         async function handleLogout() {
@@ -557,7 +595,7 @@
             try {
                 await supabaseClient.auth.signOut();
             } catch (e) {}
-            window.location.href = 'login.html';
+            window.location.href = 'index.html';
         }
 
         document.getElementById('logoutBtn').addEventListener('click', handleLogout);
