@@ -134,44 +134,30 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
-    <script>
-        lucide.createIcons();
-        const supabaseClient = supabase.createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_ANON_KEY);
+    <script type="module">
+        import config from './config.js';
 
-        function getRedirectUrl() {
-            if (window.location.protocol.startsWith('http')) {
-                return window.location.origin + window.location.pathname.replace('login.html', 'dashboard.html');
-            }
-            return undefined;
-        }
+        lucide.createIcons();
+        const supabaseClient = supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
 
         async function signInWithGoogle() {
-            try {
-                const redirectUrl = getRedirectUrl();
-                console.log('Initiating Google OAuth with redirect URL:', redirectUrl);
-
-                const options = redirectUrl ? { redirectTo: redirectUrl } : {};
-
-                const { data, error } = await supabaseClient.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: options
-                });
-
-                if (error) {
-                    console.error('Supabase OAuth error:', error);
-                    alert('Google Sign-In Error: ' + error.message);
+            const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/dashboard.html'
                 }
-            } catch (err) {
-                console.error('Google Sign In Exception:', err);
-                alert('Google Sign-In Exception: ' + err.message);
+            });
+
+            if (error) {
+                console.error('Error logging in:', error.message);
+                alert('Authentication failed: ' + error.message);
             }
         }
 
         document.getElementById('googleSignInBtn').addEventListener('click', signInWithGoogle);
 
-        // Auto redirect if active Supabase session exists
-        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        // Check for existing session
+        supabaseClient.auth.onAuthStateChange((event, session) => {
             if (session) {
                 window.location.href = 'dashboard.html';
             }
