@@ -7,10 +7,12 @@
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' https://*.supabase.co https://*.gstatic.com https://cdn.jsdelivr.net https://unpkg.com; img-src 'self' data: https://*.supabase.co https://*.gstatic.com https://i.pravatar.cc https://*.googleusercontent.com https://*.openstreetmap.org; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
     <meta name="description"
-        content="Login to Message Hunt - Start your adventure and discover hidden rewards in your city.">
-    <title>Login - Message Hunt</title>
+        content="Sign in to MessageHunt Business Creator Portal - Buy coins and promote your brand across India.">
+    <title>Creator Portal Login - MessageHunt</title>
+    <link rel="icon" type="image/png" href="ic_launcher.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@0.344.0"></script>
     <style>
         body {
             background-color: var(--bg-deep);
@@ -20,55 +22,35 @@
             min-height: 100vh;
             margin: 0;
             background:
-                radial-gradient(circle at 10% 20%, rgba(255, 87, 34, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(255, 87, 34, 0.05) 0%, transparent 40%),
+                radial-gradient(ellipse at 30% 20%, rgba(124, 58, 237, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(245, 158, 11, 0.15) 0%, transparent 60%),
                 var(--bg-deep);
         }
 
         .login-container {
             position: relative;
             width: 100%;
-            max-width: 450px;
+            max-width: 460px;
             padding: 20px;
         }
 
         .login-card {
-            background: var(--bg-surface);
+            background: var(--bg-surface-elevated);
             border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            padding: 60px 40px;
+            border-radius: 32px;
+            padding: 48px 36px;
             text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7);
             position: relative;
             overflow: hidden;
         }
 
-        /* Using start_bg.png as a subtle overlay or focused element */
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('start_bg.png') no-repeat center center;
-            background-size: cover;
-            opacity: 0.15;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .login-content {
-            position: relative;
-            z-index: 1;
-        }
-
         .brand-logo {
-            font-size: 2rem;
-            letter-spacing: 4px;
+            font-size: 1.6rem;
+            letter-spacing: 2px;
             font-weight: 800;
             color: var(--text-main);
-            margin-bottom: 10px;
+            margin-bottom: 6px;
             text-transform: uppercase;
         }
 
@@ -76,7 +58,7 @@
             background-color: #ffffff;
             color: #1f2937;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 14px 28px;
             font-size: 1rem;
             font-weight: 600;
@@ -87,19 +69,40 @@
             transition: var(--transition);
             width: 100%;
             justify-content: center;
-            margin-top: 40px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-top: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .google-btn:hover {
-            background-color: #f3f4f6;
+            background-color: #f9fafb;
             transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
 
         .google-icon {
             width: 20px;
             height: 20px;
+        }
+
+        .demo-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 14px;
+            padding: 12px 24px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 12px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .demo-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--primary-bright);
         }
 
         .subtitle {
@@ -113,8 +116,9 @@
     <div class="login-container">
         <div class="login-card">
             <div class="login-content">
-                <div class="brand-logo glow-text">MESSAGE HUNT</div>
-                <p class="subtitle">Your adventure begins with a single step</p>
+                <img src="ic_launcher.png" alt="MessageHunt Icon" width="64" height="64" class="rounded-3 mb-3 shadow-lg">
+                <div class="brand-logo gradient-text-purple">CREATOR PORTAL</div>
+                <p class="subtitle mb-2">Sign in to buy coins and promote your brand with location drops across India</p>
 
                 <button id="googleSignInBtn" class="google-btn">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
@@ -122,39 +126,93 @@
                     Sign in with Google
                 </button>
 
-                <p class="mt-4 small text-muted">By signing in, you agree to our Terms of Service</p>
+                <button id="demoLoginBtn" class="demo-btn">
+                    <i data-lucide="sparkles" style="width: 18px; height: 18px; color: var(--accent-bright);"></i>
+                    Quick Creator Access (Demo Login)
+                </button>
+
+                <div class="mt-4 p-3 text-start rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.15); font-size: 0.8rem;">
+                    <strong class="text-warning d-block mb-1">
+                        <i data-lucide="info" style="width:14px; height:14px;"></i> Seeing "redirect_uri_mismatch"?
+                    </strong>
+                    <span class="text-muted">
+                        Add this URI to <strong>Google Cloud Console → Credentials → Authorized Redirect URIs</strong>:
+                    </span>
+                    <code class="d-block text-accent my-1 p-1 rounded" style="background: rgba(0,0,0,0.3); font-size:0.75rem; word-break: break-all;">
+                        https://ngtlkwuuoojbhjjeawag.supabase.co/auth/v1/callback
+                    </code>
+                </div>
+
+                <a href="index.html" class="d-block mt-3 text-decoration-none small text-muted">
+                    ← Back to Product Home
+                </a>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module">
-        import config from './config.js';
+    <script src="config.js"></script>
+    <script>
+        lucide.createIcons();
+        const supabaseClient = supabase.createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_ANON_KEY);
 
-        const supabaseClient = supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+        function getRedirectUrl() {
+            // Google OAuth does not accept file:// URIs.
+            // If running on http/https (e.g. localhost or hosted server), construct origin URL.
+            if (window.location.protocol.startsWith('http')) {
+                return window.location.origin + window.location.pathname.replace('login.html', 'dashboard.html');
+            }
+            // For file:// protocol, return undefined so Supabase defaults to configured Site URL
+            return undefined;
+        }
 
         async function signInWithGoogle() {
-            const { data, error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.origin + '/dashboard.html'
-                }
-            });
+            try {
+                const redirectUrl = getRedirectUrl();
+                console.log('Initiating Google OAuth with redirect URL:', redirectUrl);
 
-            if (error) {
-                console.error('Error logging in:', error.message);
-                alert('Authentication failed: ' + error.message);
+                const options = redirectUrl ? { redirectTo: redirectUrl } : {};
+
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: options
+                });
+
+                if (error) {
+                    console.error('Supabase OAuth error:', error);
+                    alert('Google Sign-In Error: ' + error.message + '\n\nFalling back to Quick Creator Access.');
+                    loginDemoUser();
+                }
+            } catch (err) {
+                console.error('Google Sign In Exception:', err);
+                loginDemoUser();
             }
         }
 
-        document.getElementById('googleSignInBtn').addEventListener('click', signInWithGoogle);
+        function loginDemoUser() {
+            localStorage.setItem('demo_user_session', JSON.stringify({
+                id: 'demo-creator-uid',
+                name: 'Business Creator',
+                email: 'creator@business.com',
+                photo_url: 'https://i.pravatar.cc/150?u=creator',
+                reward_points: 25000
+            }));
+            window.location.href = 'dashboard.html';
+        }
 
-        // Check for existing session
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                window.location.href = 'dashboard.html';
-            }
-        });
+        document.getElementById('googleSignInBtn').addEventListener('click', signInWithGoogle);
+        document.getElementById('demoLoginBtn').addEventListener('click', loginDemoUser);
+
+        // Auto redirect if session exists
+        if (localStorage.getItem('demo_user_session')) {
+            window.location.href = 'dashboard.html';
+        } else {
+            supabaseClient.auth.getSession().then(({ data: { session } }) => {
+                if (session) {
+                    window.location.href = 'dashboard.html';
+                }
+            });
+        }
     </script>
 </body>
 

@@ -7,155 +7,351 @@
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' https://*.supabase.co https://*.gstatic.com https://cdn.jsdelivr.net https://unpkg.com; img-src 'self' data: https://*.supabase.co https://*.gstatic.com https://i.pravatar.cc https://*.googleusercontent.com https://*.openstreetmap.org; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
     <meta name="description"
-        content="Message Hunt - Discover hidden rewards, claim digital items, and explore your city through location-based challenges.">
-    <title>Message Hunt - Discover & Claim Rewards</title>
+        content="MessageHunt - Real-world treasure hunt app for explorers to collect rewards, and promotion platform for creators & businesses across India.">
+    <title>MessageHunt - Collect Rewards & Business Promotion Platform</title>
+    <link rel="icon" type="image/png" href="ic_launcher.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@0.344.0"></script>
 </head>
 
 <body>
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#hero">MESSAGE HUNT</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <a class="navbar-brand" href="#hero">
+                <img src="ic_launcher.png" alt="MessageHunt Icon" class="brand-app-icon">
+                MESSAGE HUNT
+            </a>
+            <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+                <i data-lucide="menu"></i>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
-                        <a class="btn btn-primary" target="_blank">Coming Soon</a>
+                        <a class="nav-link" href="#about">About App</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#download">Get App</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#business">For Business & Creators</a>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <a href="login.html" class="btn btn-primary btn-sm px-4 py-2">
+                            <i data-lucide="building-2" style="width: 18px; height: 18px;"></i>
+                            Creator Portal Login
+                        </a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
+    <!-- Hero Section -->
     <section id="hero" class="hero-section">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8 hero-content">
-                    <span class="feature-tag">COMING VERY SOON</span>
-                    <h1>Hunt for <span style="color: var(--primary-bright)">Rewards</span><br>Discover the<br>World
-                        Around You</h1>
-                    <p>Message Hunt turns your city into a playground. Soon, you'll be able to find hidden coin drops,
-                        claim localized rewards, and complete challenges left by friends.</p>
-                    <div class="d-flex gap-3 mt-4">
-                        <a href="#start" class="btn btn-primary">Stay Tuned</a>
-                        <a href="#challenge" class="nav-link" style="align-self: center;">Explore Features</a>
+            <div class="row align-items-center g-5">
+                <div class="col-lg-7 hero-content">
+                    <div class="feature-tag">
+                        <span class="pulse-dot"></span>
+                        EXPLORE REWARDS & PROMOTE BRAND
+                    </div>
+                    <h1>
+                        Hunt for <span class="gradient-text-gold glow-text-gold">Rewards</span>.<br>
+                        Promote Your <span class="gradient-text-purple">Brand</span> Across India.
+                    </h1>
+                    <p class="hero-subtitle">
+                        Explorers use the MessageHunt mobile app to discover real coin drops and claim rewards in their city. Companies, creators, and businesses use our Creator Portal to buy coins and drop promotional campaigns attached to custom links and banners across target Indian states.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3 mt-4">
+                        <a href="https://play.google.com/store/apps/details?id=com.vinayismd.messagehunt" target="_blank"
+                            class="btn btn-accent">
+                            <i data-lucide="play"></i>
+                            Google Play Store
+                        </a>
+                        <a href="https://apps.apple.com" target="_blank"
+                            class="btn btn-outline-glass">
+                            <i data-lucide="apple"></i>
+                            Apple App Store
+                        </a>
+                        <a href="login.html" class="btn btn-primary">
+                            <i data-lucide="sparkles"></i>
+                            Creator Portal Sign In
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5 hero-mockup-container">
+                    <div class="hero-mockup-glow"></div>
+                    <div class="phone-card">
+                        <div class="phone-screen-header">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="ic_launcher.png" width="22" height="22" class="rounded-circle">
+                                <span class="fw-bold small text-white">Live Hunt Radar</span>
+                            </div>
+                            <div class="mini-badge">
+                                <i data-lucide="coins" style="width: 14px; height: 14px;"></i>
+                                1,250 PTS
+                            </div>
+                        </div>
+
+                        <!-- Mockup Map -->
+                        <div class="mockup-map-box mb-3">
+                            <div class="mockup-map-bg"></div>
+                            <div class="map-pin-demo pin-1" title="Coin Drop - 500 PTS">
+                                <i data-lucide="gift" style="width: 20px; height: 20px;"></i>
+                            </div>
+                            <div class="map-pin-demo pin-2" title="Brand Campaign Drop">
+                                <i data-lucide="megaphone" style="width: 20px; height: 20px;"></i>
+                            </div>
+                            <div class="map-pin-demo pin-3" title="Claimed Drop">
+                                <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+                            </div>
+                        </div>
+
+                        <div class="mockup-card-body">
+                            <div class="mockup-stat-row">
+                                <div class="mockup-stat-item">
+                                    <div class="mockup-stat-value">111m</div>
+                                    <div class="mockup-stat-label">Claim Radius</div>
+                                </div>
+                                <div class="mockup-stat-item">
+                                    <div class="mockup-stat-value">Active Drops</div>
+                                    <div class="mockup-stat-label">Real-Time</div>
+                                </div>
+                                <div class="mockup-stat-item">
+                                    <div class="mockup-stat-value" style="color: var(--accent-bright);">🔥 Burning</div>
+                                    <div class="mockup-stat-label">Proximity</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="challenge" class="section-padding">
+    <!-- App Download Section for Explorers -->
+    <section id="download" class="stats-strip text-center">
         <div class="container">
-            <div class="row align-items-center mb-5">
-                <div class="col-lg-7">
-                    <span class="feature-tag">THE HUNT IS ON</span>
-                    <h2>More Than Just Messaging</h2>
-                    <p>Whether you're hunting for a friend's secret note or a community-wide coin drop, Message Hunt
-                        provides a unique location-based experience that gets you moving.</p>
+            <div class="row align-items-center justify-content-between g-4">
+                <div class="col-lg-6 text-lg-start">
+                    <span class="badge bg-warning bg-opacity-20 text-warning px-3 py-2 rounded-pill mb-2 fw-bold">FOR EXPLORERS</span>
+                    <h3 class="fw-bold text-white mb-2">Download MessageHunt App to Collect Rewards</h3>
+                    <p class="text-muted mb-0">Available on both Android and iOS! Start hunting for coin drops and claiming rewards in your area today.</p>
                 </div>
-            </div>
-            <div class="row g-4">
-                <div class="col-lg-4">
-                    <div class="glass-panel curious-card p-5 h-100">
-                        <div class="mb-4 text-primary">
-                            <i data-lucide="coins" style="width: 48px; height: 48px;"></i>
-                        </div>
-                        <h3>Coin Drops</h3>
-                        <p>Discover digital currency drops near you. Keep your eyes on the map and be the first to reach
-                            the coordinates to claim your reward.</p>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="glass-panel curious-card p-5 h-100">
-                        <div class="mb-4 text-accent">
-                            <i data-lucide="trophy" style="width: 48px; height: 48px;"></i>
-                        </div>
-                        <h3>Local Challenges</h3>
-                        <p>Participate in exciting local challenges. From finding specific landmarks to solving riddles,
-                            earn your spot on the leaderboard.</p>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="glass-panel curious-card p-5 h-100">
-                        <div class="mb-4" style="color: #60A5FA">
-                            <i data-lucide="gift" style="width: 48px; height: 48px;"></i>
-                        </div>
-                        <h3>Claim Rewards</h3>
-                        <p>Found a reward? Claim exclusive digital items, badges, and gifts hidden in plain sight across
-                            your city.</p>
+                <div class="col-lg-6">
+                    <div class="d-flex justify-content-lg-end justify-content-center gap-3 flex-wrap">
+                        <a href="https://play.google.com/store/apps/details?id=com.vinayismd.messagehunt" target="_blank"
+                            class="btn btn-accent px-4 py-3">
+                            <i data-lucide="play"></i> Google Play Store
+                        </a>
+                        <a href="https://apps.apple.com" target="_blank"
+                            class="btn btn-outline-glass px-4 py-3">
+                            <i data-lucide="apple"></i> Apple App Store
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <div class="container">
-        <section id="start" class="start-section">
-            <div class="container">
-                <span class="feature-tag">STAY TUNED</span>
-                <h2 class="text-white">Your Next Adventure Awaits</h2>
-                <p class="mx-auto" style="max-width: 600px;">We're currently finalizing the experience for explorers
-                    worldwide. Be the first to know when the hunt begins in your neighborhood.</p>
-                <div class="mt-5">
-                    <div class="d-flex justify-content-center gap-3 flex-wrap">
-                        <div class="btn btn-primary btn-lg d-flex align-items-center gap-2 opacity-75"
-                            style="cursor: default;">
-                            <i data-lucide="smartphone"></i> App Store (Soon)
+    <!-- Overview Section -->
+    <section id="about" class="section-padding">
+        <div class="container">
+            <div class="row justify-content-center text-center mb-5">
+                <div class="col-lg-8">
+                    <span class="feature-tag">HOW IT WORKS</span>
+                    <h2 class="display-6 fw-bold mb-3">Connecting Explorers with Brands</h2>
+                    <p class="text-muted leading-relaxed">
+                        MessageHunt creates a real-world bridge between curious explorers and business creators. Explorers use the mobile app to collect rewards, while creators use the Web Portal to purchase coins and drop promotional campaigns targeted to specific Indian states.
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon-wrapper icon-amber mx-auto">
+                            <i data-lucide="smartphone" style="width: 28px; height: 28px;"></i>
                         </div>
-                        <div class="btn btn-primary btn-lg d-flex align-items-center gap-2 opacity-75"
-                            style="cursor: default;">
-                            <i data-lucide="play"></i> Google Play (Soon)
+                        <h3>1. Explorers Download App</h3>
+                        <p>Users download MessageHunt on Play Store or App Store to explore their city map and collect real coin rewards within a 111m radius.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon-wrapper icon-purple mx-auto">
+                            <i data-lucide="coins" style="width: 28px; height: 28px;"></i>
+                        </div>
+                        <h3>2. Creators Buy Coins</h3>
+                        <p>Businesses & creators sign in on this web portal, request coin packages via email, and receive coin credits from the admin team.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon-wrapper icon-emerald mx-auto">
+                            <i data-lucide="map-pin" style="width: 28px; height: 28px;"></i>
+                        </div>
+                        <h3>3. Drop & Promote Across India</h3>
+                        <p>Creators drop coins with attached URLs and banners across target Indian states. Explorers visit coordinates to claim and engage!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dedicated Section for Businesses & Creators -->
+    <section id="business" class="section-padding bg-black bg-opacity-30 border-top border-bottom border-glass">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6">
+                    <span class="feature-tag">FOR COMPANIES & CREATORS</span>
+                    <h2 class="display-6 fw-bold mb-4">Promote Your Business with Location-Based Drops</h2>
+                    <p class="text-muted mb-4">
+                        Are you a company, content creator, or business owner looking for a unique way to drive traffic and engagement?
+                        MessageHunt allows you to distribute promotional coin drops with attached URLs and custom photos directly onto real-world coordinates for mobile explorers to find.
+                    </p>
+                    <ul class="list-unstyled d-flex flex-column gap-3 mb-4">
+                        <li class="d-flex align-items-center gap-3">
+                            <div class="brand-app-icon d-flex align-items-center justify-content-center bg-primary bg-opacity-20 text-primary">
+                                <i data-lucide="map-pin" style="width: 20px; height: 20px;"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 text-white fw-bold">Target Specific States in India</h6>
+                                <small class="text-muted">Pick any of 28 States & 8 Union Territories to distribute your drops.</small>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center gap-3">
+                            <div class="brand-app-icon d-flex align-items-center justify-content-center bg-warning bg-opacity-20 text-warning">
+                                <i data-lucide="link" style="width: 20px; height: 20px;"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 text-white fw-bold">Attach Secret Links & Banners</h6>
+                                <small class="text-muted">Link your online store, product launch, YouTube video, or special offer.</small>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center gap-3">
+                            <div class="brand-app-icon d-flex align-items-center justify-content-center bg-success bg-opacity-20 text-success">
+                                <i data-lucide="mail" style="width: 20px; height: 20px;"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 text-white fw-bold">Simple Coin Purchase via Email</h6>
+                                <small class="text-muted">Request coin packages directly by email to get credited by the admin.</small>
+                            </div>
+                        </li>
+                    </ul>
+                    <a href="login.html" class="btn btn-primary btn-lg">
+                        <i data-lucide="building-2"></i> Sign In to Creator Portal
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    <div class="showcase-card p-4 border border-glass">
+                        <h4 class="fw-bold text-white mb-3">How Creator Promotion Works</h4>
+                        <div class="d-flex flex-column gap-3">
+                            <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="fw-bold text-warning">Step 1: Buy Coins</span>
+                                    <span class="badge bg-dark text-muted">Email Admin</span>
+                                </div>
+                                <p class="small text-muted mb-0">Select a coin package (e.g. 25,000 PTS) and send a pre-filled request email to the MessageHunt admin team.</p>
+                            </div>
+                            <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="fw-bold text-primary-bright">Step 2: Admin Credits Coins</span>
+                                    <span class="badge bg-success bg-opacity-20 text-success">Verified</span>
+                                </div>
+                                <p class="small text-muted mb-0">Admin verifies your payment and updates your user coin balance instantly on your web dashboard.</p>
+                            </div>
+                            <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="fw-bold text-info">Step 3: Drop & Track Results</span>
+                                    <span class="badge bg-info bg-opacity-20 text-info">Live Map</span>
+                                </div>
+                                <p class="small text-muted mb-0">Drop your coins across Maharashtra, Karnataka, Delhi, etc., with attached URLs. Watch real explorers claim your drops!</p>
+                            </div>
                         </div>
                     </div>
-                    <p class="mt-4 small text-muted">Join 10,000+ curious explorers on the waitlist</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Explorer App Download & Creator Portal Banner -->
+    <div class="container">
+        <section class="cta-banner">
+            <div class="container position-relative" style="z-index: 1;">
+                <span class="feature-tag mb-3">GET STARTED TODAY</span>
+                <h2 class="display-5 fw-bold text-white mb-3">Join MessageHunt as an Explorer or Creator</h2>
+                <p class="text-muted mx-auto mb-5" style="max-width: 650px;">
+                    Download the mobile app on Play Store & App Store to collect rewards, or log into the Web Creator Portal to launch promotional campaigns.
+                </p>
+
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="https://play.google.com/store/apps/details?id=com.vinayismd.messagehunt" target="_blank"
+                        class="btn btn-accent btn-lg">
+                        <i data-lucide="play"></i>
+                        Google Play Store
+                    </a>
+                    <a href="https://apps.apple.com" target="_blank"
+                        class="btn btn-outline-glass btn-lg">
+                        <i data-lucide="apple"></i>
+                        Apple App Store
+                    </a>
+                    <a href="login.html" class="btn btn-primary btn-lg">
+                        <i data-lucide="sparkles"></i>
+                        Launch Creator Portal
+                    </a>
                 </div>
             </div>
         </section>
     </div>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="row">
+            <div class="row g-4 mb-5">
                 <div class="col-lg-4 mb-4 mb-lg-0">
-                    <a class="navbar-brand mb-4 d-block" href="#">MESSAGE HUNT</a>
-                    <p class="text-muted" style="max-width: 300px;">The world is full of hidden stories and rewards.
-                        We're just helping you find them.</p>
+                    <a class="navbar-brand mb-3 d-inline-flex" href="#">
+                        <img src="ic_launcher.png" alt="MessageHunt Icon" class="brand-app-icon">
+                        MESSAGE HUNT
+                    </a>
+                    <p class="text-muted small" style="max-width: 320px;">
+                        Connecting real-world reward explorers with brands and creators across India.
+                    </p>
                 </div>
                 <div class="col-lg-8">
-                    <div class="row">
-                        <div class="col-6 col-md-4 mb-4">
-                            <h5 class="text-white">Experience</h5>
-                            <ul class="list-unstyled">
-                                <li><a href="#" class="nav-link p-0 mb-2">Map Explore</a></li>
-                                <li><a href="#" class="nav-link p-0 mb-2">Reward Drops</a></li>
-                                <li><a href="#" class="nav-link p-0 mb-2">Challenges</a></li>
+                    <div class="row g-4">
+                        <div class="col-6 col-md-4">
+                            <h6 class="text-white fw-bold mb-3">Get Mobile App</h6>
+                            <ul class="list-unstyled d-flex flex-column gap-2 small">
+                                <li><a href="https://play.google.com/store/apps/details?id=com.vinayismd.messagehunt" target="_blank" class="footer-link">Google Play Store</a></li>
+                                <li><a href="https://apps.apple.com" target="_blank" class="footer-link">Apple App Store</a></li>
                             </ul>
                         </div>
-                        <div class="col-6 col-md-4 mb-4">
-                            <h5 class="text-white">Platform</h5>
-                            <ul class="list-unstyled">
-                                <li><a href="#" class="nav-link p-0 mb-2">Waitlist</a></li>
-                                <li><a href="#" class="nav-link p-0 mb-2">Early Access</a></li>
+                        <div class="col-6 col-md-4">
+                            <h6 class="text-white fw-bold mb-3">Creator Portal</h6>
+                            <ul class="list-unstyled d-flex flex-column gap-2 small">
+                                <li><a href="login.html" class="footer-link">Creator Sign In</a></li>
+                                <li><a href="dashboard.html" class="footer-link">Promotional Dashboard</a></li>
                             </ul>
                         </div>
                         <div class="col-12 col-md-4">
-                            <h5 class="text-white">Legal</h5>
-                            <ul class="list-unstyled">
-                                <li><a href="#" class="nav-link p-0 mb-2">Privacy Policy</a></li>
-                                <li><a href="#" class="nav-link p-0 mb-2">Terms of Service</a></li>
+                            <h6 class="text-white fw-bold mb-3">Legal & Support</h6>
+                            <ul class="list-unstyled d-flex flex-column gap-2 small">
+                                <li><a href="privacy_policy.md" target="_blank" class="footer-link">Privacy Policy</a></li>
+                                <li><a href="mailto:support@messagehunt.app" class="footer-link">Contact Admin Email</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
-            <hr class="my-5" style="border-color: var(--glass-border);">
-            <div class="text-center text-muted small">
-                <p>&copy; 2026 Message Hunt. Built for the Curious ♡</p>
+            <hr style="border-color: var(--glass-border);">
+            <div class="text-center text-muted small pt-3">
+                <p>&copy; 2026 MessageHunt. Built for Explorers & Creators ♡</p>
             </div>
         </div>
     </footer>
