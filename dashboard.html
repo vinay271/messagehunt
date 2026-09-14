@@ -942,13 +942,33 @@
         }
 
         // User session guard & profile synchronization
+        function revealDashboard() {
+            document.body.style.display = 'flex';
+            // Leaflet mis-sizes when created while body was display:none — fix after layout
+            requestAnimationFrame(() => {
+                fixMapSize();
+                setTimeout(fixMapSize, 50);
+                setTimeout(fixMapSize, 250);
+            });
+        }
+
+        function fixMapSize() {
+            if (window.dashboardMap) {
+                try {
+                    window.dashboardMap.invalidateSize({ animate: false });
+                } catch (e) {
+                    console.warn('Map resize failed:', e);
+                }
+            }
+        }
+
         async function checkSession() {
             if (checkOAuthErrors()) return;
 
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
-                    document.body.style.display = 'flex';
+                    revealDashboard();
                     window.currentUserId = session.user.id;
                     window.currentUserEmail = session.user.email;
                     await syncUserProfile(session.user);
@@ -1059,7 +1079,7 @@
 
         supabaseClient.auth.onAuthStateChange((event, session) => {
             if (session && session.user) {
-                document.body.style.display = 'flex';
+                revealDashboard();
                 window.currentUserId = session.user.id;
                 window.currentUserEmail = session.user.email;
                 syncUserProfile(session.user);
@@ -1076,12 +1096,30 @@
             zoomControl: false,
             attributionControl: false
         }).setView([20.5937, 78.9629], 5);
+        window.dashboardMap = map;
 
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 19,
         }).addTo(map);
 
         L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        // Keep tiles correct when the map container size changes
+        window.addEventListener('resize', () => fixMapSize());
+        if (typeof ResizeObserver !== 'undefined') {
+            const mapEl = document.getElementById('map');
+            if (mapEl) {
+                new ResizeObserver(() => fixMapSize()).observe(mapEl);
+            }
+        }
+
+        // If session already revealed the body before map init finished, resize now
+        if (document.body.style.display === 'flex') {
+            requestAnimationFrame(() => {
+                fixMapSize();
+                setTimeout(fixMapSize, 100);
+            });
+        }
 
         window.userProfileCache = {};
         const markers = new Map();
@@ -1267,6 +1305,7 @@
         }
 
         async function initPromotionsAndMap() {
+            fixMapSize();
             const promotions = await fetchUserPromotions();
             let selected = null;
             try {
@@ -1275,6 +1314,7 @@
             } catch (e) {}
             if (!selected && promotions.length) selected = promotions[0]; // latest
             await setActivePromotion(selected, { persist: !!selected });
+            fixMapSize();
         }
 
         async function loadDrops() {
@@ -1284,6 +1324,7 @@
 
                 markers.forEach((marker) => map.removeLayer(marker));
                 markers.clear();
+                fixMapSize();
 
                 if (!window.activePromotionId) {
                     updateActivePromotionBanner();
@@ -1310,9 +1351,15 @@
                         if (coords) group.push([coords.lat, coords.lng]);
                     });
                     if (group.length) {
-                        try { map.fitBounds(group, { padding: [40, 40], maxZoom: 12 }); } catch (e) {}
+                        try {
+                            map.fitBounds(group, { padding: [40, 40], maxZoom: 12 });
+                        } catch (e) {}
                     }
                 }
+                requestAnimationFrame(() => {
+                    fixMapSize();
+                    setTimeout(fixMapSize, 100);
+                });
             } catch (err) {
                 console.error('Failed to load drops:', err);
             }
