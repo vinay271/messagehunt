@@ -430,9 +430,25 @@
                     <div class="row mb-3">
                         <div class="col-12">
                             <label class="form-label">Total Coins / Points to Drop</label>
-                            <input type="number" id="dropPointsInput" class="form-control" placeholder="Enter points (e.g. 1000)" min="50" value="500">
-                            <small class="text-subtle" style="font-size:0.75rem;">Minimum 50 PTS per drop</small>
+                            <input type="number" id="dropPointsInput" class="form-control" placeholder="Enter points (e.g. 1000)" min="50" value="500" step="1">
+                            <small class="text-subtle" style="font-size:0.75rem;">Distributed using the point sizes you select below</small>
                         </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Points per drop <span class="text-muted">(select one or more)</span></label>
+                        <div id="dropDenominationGroup" class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-glass rounded-4 px-3 drop-denom-btn" data-points="10" aria-pressed="false">10</button>
+                            <button type="button" class="btn btn-sm btn-outline-glass rounded-4 px-3 drop-denom-btn" data-points="25" aria-pressed="false">25</button>
+                            <button type="button" class="btn btn-sm btn-outline-glass rounded-4 px-3 drop-denom-btn active" data-points="50" aria-pressed="true">50</button>
+                            <button type="button" class="btn btn-sm btn-outline-glass rounded-4 px-3 drop-denom-btn" data-points="75" aria-pressed="false">75</button>
+                            <button type="button" class="btn btn-sm btn-outline-glass rounded-4 px-3 drop-denom-btn" data-points="100" aria-pressed="false">100</button>
+                        </div>
+                        <small class="text-subtle d-block mt-2" style="font-size:0.75rem;">
+                            Multiple selected values are mixed across the map from your total.
+                        </small>
+                        <small id="dropDistributionPreview" class="text-muted d-block mt-1" style="font-size:0.8rem;">
+                            500 PTS → 10 drops of 50 PTS each
+                        </small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Target State in India</label>
@@ -1071,8 +1087,11 @@
             const stateSelect = document.getElementById('dropStateSelect');
             const photoInput = document.getElementById('smilePhoto');
             const linkInput = document.getElementById('smileLink');
+            const sendBtn = document.getElementById('sendSmileBtn');
+            const activeDenom = document.querySelector('.drop-denom-btn.active');
 
-            const totalPoints = parseInt(amountInput.value);
+            const totalPoints = parseInt(amountInput.value, 10);
+            const pointsPerDrop = activeDenom ? parseInt(activeDenom.dataset.points, 10) : 50;
             const stateCode = stateSelect.value;
             const link = linkInput.value;
             let photoUrl = "";
@@ -1082,14 +1101,34 @@
                 return;
             }
 
-            if (totalPoints < 50) {
-                alert('Minimum reward amount is 50 points.');
+            if (![10, 25, 50, 75, 100].includes(pointsPerDrop)) {
+                alert('Please select points per drop (10, 25, 50, 75, or 100).');
                 return;
+            }
+
+            if (totalPoints < pointsPerDrop) {
+                alert(`Total points must be at least ${pointsPerDrop}.`);
+                return;
+            }
+
+            if (totalPoints % pointsPerDrop !== 0) {
+                alert(`Total points must be a multiple of ${pointsPerDrop}. Example: ${pointsPerDrop * Math.ceil(totalPoints / pointsPerDrop)}.`);
+                return;
+            }
+
+            const originalBtnHtml = sendBtn ? sendBtn.innerHTML : '';
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.textContent = 'Distributing…';
             }
 
             try {
                 const { data: { user } } = await supabaseClient.auth.getUser();
-                const userId = user ? user.id : 'demo-creator-uid';
+                if (!user) {
+                    alert('Please sign in again to distribute coins.');
+                    return;
+                }
+                const userId = user.id;
 
                 if (photoInput.files && photoInput.files.length > 0) {
                     const file = photoInput.files[0];
@@ -1122,30 +1161,117 @@
                     total_points_to_drop: totalPoints,
                     target_state_code: stateCode,
                     photo_url: photoUrl,
-                    secret_link: link
+                    secret_link: link,
+                    points_per_drop: pointsPerDrop
                 });
 
                 if (error) {
-                    alert(`Error dropping coins: ${error.message}`);
+                    console.error('distribute_promotional_drops failed:', error);
+                    if ((error.message || '').includes('reward_points')) {
+                        alert('Something went wrong. Try again. If this keeps happening, the points security rule on the server needs a fix.');
+                    } else if ((error.message || '').toLowerCase().includes('insufficient')) {
+                        alert(error.message);
+                    } else {
+                        alert(error.message || 'Something went wrong. Try again.');
+                    }
                     return;
                 }
 
                 loadDrops();
                 checkSession();
 
-                alert(`Success! Created ${data ? data.length : 'promotional'} coin drops in ${stateCode}.`);
+                const dropCount = data && data.drop_count != null ? data.drop_count : (totalPoints / pointsPerDrop);
+                alert(`Success! Created ${dropCount} drops of ${pointsPerDrop} PTS each in ${stateCode}.`);
 
+                if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                    document.activeElement.blur();
+                }
                 const modal = bootstrap.Modal.getInstance(document.getElementById('dropCoinsModal'));
-                modal.hide();
+                if (modal) modal.hide();
 
                 linkInput.value = '';
                 photoInput.value = '';
+                amountInput.value = '500';
+                stateSelect.value = '';
+                document.querySelectorAll('.drop-denom-btn').forEach((btn) => {
+                    btn.classList.toggle('active', btn.dataset.points === '50');
+                });
+                updateDropDistributionPreview();
             } catch (err) {
-                alert('Action failed: ' + (err.message || err));
+                console.error('sendSmile failed:', err);
+                alert('Something went wrong. Try again.');
+            } finally {
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = originalBtnHtml;
+                    lucide.createIcons();
+                }
             }
         }
 
+        function updateDropDistributionPreview() {
+            const amountInput = document.getElementById('dropPointsInput');
+            const preview = document.getElementById('dropDistributionPreview');
+            const activeDenom = document.querySelector('.drop-denom-btn.active');
+            if (!preview || !amountInput || !activeDenom) return;
+
+            const total = parseInt(amountInput.value, 10);
+            const perDrop = parseInt(activeDenom.dataset.points, 10);
+
+            if (!total || !perDrop) {
+                preview.textContent = 'Enter a total and select points per drop.';
+                preview.classList.remove('text-warning');
+                preview.classList.add('text-muted');
+                return;
+            }
+
+            if (total < perDrop) {
+                preview.textContent = `Total must be at least ${perDrop} PTS.`;
+                preview.classList.add('text-warning');
+                preview.classList.remove('text-muted');
+                return;
+            }
+
+            if (total % perDrop !== 0) {
+                const suggested = perDrop * Math.ceil(total / perDrop);
+                preview.textContent = `Total must be a multiple of ${perDrop}. Try ${suggested} PTS → ${suggested / perDrop} drops.`;
+                preview.classList.add('text-warning');
+                preview.classList.remove('text-muted');
+                return;
+            }
+
+            const drops = total / perDrop;
+            preview.textContent = `${total.toLocaleString()} PTS → ${drops} drop${drops === 1 ? '' : 's'} of ${perDrop} PTS each`;
+            preview.classList.remove('text-warning');
+            preview.classList.add('text-muted');
+        }
+
+        document.querySelectorAll('.drop-denom-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.drop-denom-btn').forEach((b) => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateDropDistributionPreview();
+            });
+        });
+
+        const dropPointsInputEl = document.getElementById('dropPointsInput');
+        if (dropPointsInputEl) {
+            dropPointsInputEl.addEventListener('input', updateDropDistributionPreview);
+        }
+        updateDropDistributionPreview();
+
         document.getElementById('sendSmileBtn').addEventListener('click', sendSmile);
+
+        // Avoid aria-hidden + focused-descendant warnings when Bootstrap closes modals
+        ['buyCoinsModal', 'dropCoinsModal', 'userProfileModal'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('hide.bs.modal', () => {
+                if (document.activeElement && el.contains(document.activeElement)) {
+                    document.activeElement.blur();
+                }
+            });
+        });
     </script>
 </body>
 

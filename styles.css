@@ -579,6 +579,12 @@ h1, h2, h3, h4, h5, .navbar-brand {
     background: rgba(245, 158, 11, 0.08);
 }
 
+.drop-denom-btn.active {
+    background: var(--primary) !important;
+    border-color: var(--primary-bright) !important;
+    color: #fff !important;
+}
+
 .coin-package-badge {
     position: absolute;
     top: -12px;
