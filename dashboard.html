@@ -254,7 +254,7 @@
             <button class="btn btn-sm btn-accent px-3 rounded-4 fw-bold" data-bs-toggle="modal" data-bs-target="#buyCoinsModal">
                 <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i> Buy Coins
             </button>
-            <button id="logoutBtn" class="btn btn-sm btn-outline-glass rounded-4 px-3">Logout</button>
+            <button id="logoutBtn" onclick="handleLogout()" class="btn btn-sm btn-outline-glass rounded-4 px-3">Logout</button>
         </div>
     </header>
 
@@ -545,13 +545,13 @@
         async function syncUserProfile(authUser) {
             const metaName = authUser.user_metadata?.full_name || authUser.user_metadata?.name || (authUser.email ? authUser.email.split('@')[0] : 'Creator');
             const metaPhoto = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || ('https://i.pravatar.cc/150?u=' + authUser.id);
-            
+
             let displayName = metaName;
             let photoUrl = metaPhoto;
-            let rewardPoints = 25000;
 
             try {
-                const { data: existingUser, error: fetchError } = await supabaseClient
+                // Fetch profile data from Supabase 'users' table
+                const { data: existingUser } = await supabaseClient
                     .from('users')
                     .select('name, photo_url, reward_points')
                     .eq('uuid', authUser.id)
@@ -560,16 +560,17 @@
                 if (existingUser) {
                     if (existingUser.name) displayName = existingUser.name;
                     if (existingUser.photo_url) photoUrl = existingUser.photo_url;
-                    if (existingUser.reward_points !== undefined && existingUser.reward_points !== null) {
+                    if (existingUser.  !== undefined && existingUser.reward_points !== null) {
                         rewardPoints = existingUser.reward_points;
+                    }else{
+                    rewardPoints = 0
                     }
                 } else {
                     const newUser = {
                         uuid: authUser.id,
                         name: metaName,
                         email: authUser.email || '',
-                        photo_url: metaPhoto,
-                        reward_points: rewardPoints
+                        photo_url: metaPhoto
                     };
                     await supabaseClient.from('users').upsert([newUser], { onConflict: 'uuid' });
                 }
@@ -577,6 +578,7 @@
                 console.warn('Failed to sync profile with database:', err);
             }
 
+            // 2. Update UI with fetched database values
             updateUI(displayName, photoUrl, rewardPoints);
         }
 
@@ -586,19 +588,40 @@
             const pointsEl = document.getElementById('userCoinBalance');
 
             if (name && nameEl) nameEl.textContent = name;
-            if (photoUrl && photoEl) photoEl.src = photoUrl;
+            if (photoUrl && photoEl) {
+                photoEl.src = photoUrl;
+                photoEl.onerror = function() {
+                    this.src = 'https://i.pravatar.cc/150?u=fallback';
+                };
+            }
             if (points !== undefined && pointsEl) pointsEl.textContent = Number(points).toLocaleString();
         }
 
-        async function handleLogout() {
+        window.handleLogout = async function handleLogout() {
             localStorage.removeItem('demo_user_session');
             try {
                 await supabaseClient.auth.signOut();
-            } catch (e) {}
+            } catch (e) {
+                console.error('Logout error:', e);
+            }
             window.location.href = 'index.html';
+        };
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', window.handleLogout);
         }
 
-        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (session && session.user) {
+                document.body.style.display = 'flex';
+                window.currentUserEmail = session.user.email;
+                syncUserProfile(session.user);
+            } else if (event === 'SIGNED_OUT') {
+                window.location.href = 'index.html';
+            }
+        });
+
         checkSession();
 
         // Initialize Leaflet Map with Esri World Dark Gray Base
