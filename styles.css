@@ -573,6 +573,12 @@ h1, h2, h3, h4, h5, .navbar-brand {
     box-shadow: 0 0 25px var(--primary-glow);
 }
 
+.coin-package-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 28px var(--accent-glow);
+    background: rgba(245, 158, 11, 0.08);
+}
+
 .coin-package-badge {
     position: absolute;
     top: -12px;
@@ -592,6 +598,31 @@ h1, h2, h3, h4, h5, .navbar-brand {
     border: 1px dashed rgba(124, 58, 237, 0.3);
     border-radius: 20px;
     padding: 20px;
+}
+
+.buy-step {
+    display: none;
+}
+
+.buy-step.active {
+    display: block;
+}
+
+.referral-hint {
+    min-height: 1.25rem;
+    font-size: 0.8rem;
+}
+
+.buy-success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    margin-bottom: 1rem;
 }
 
 /* Section Padding */
