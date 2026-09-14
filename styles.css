@@ -91,19 +91,90 @@ h1, h2, h3, h4, h5, .navbar-brand {
 .gradient-text {
     background: linear-gradient(135deg, #FFFFFF 0%, var(--primary-bright) 50%, var(--accent-bright) 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
+    color: transparent;
 }
 
 .gradient-text-purple {
     background: linear-gradient(135deg, var(--primary-bright) 0%, #C084FC 50%, var(--accent) 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
+    color: transparent;
 }
 
 .gradient-text-gold {
     background: linear-gradient(135deg, #FDE047 0%, var(--accent) 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+/* Keep chips/badges readable (do not inherit transparent text-fill / clip) */
+.badge,
+.mini-badge,
+.feature-tag,
+.status-chip {
+    -webkit-text-fill-color: currentColor;
+    background-clip: padding-box;
+    -webkit-background-clip: padding-box;
+}
+
+.status-chip {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    line-height: 1.2;
+    border: 1px solid transparent;
+}
+
+.status-chip-gold {
+    color: #FDE68A;
+    background: rgba(245, 158, 11, 0.22);
+    border-color: rgba(251, 191, 36, 0.45);
+}
+
+.status-chip-green {
+    color: #6EE7B7;
+    background: rgba(16, 185, 129, 0.22);
+    border-color: rgba(52, 211, 153, 0.45);
+}
+
+.status-chip-blue {
+    color: #7DD3FC;
+    background: rgba(14, 165, 233, 0.22);
+    border-color: rgba(56, 189, 248, 0.45);
+}
+
+.status-chip-muted {
+    color: #E5E7EB;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--glass-border);
+}
+
+.text-warning {
+    color: #FBBF24 !important;
+    -webkit-text-fill-color: #FBBF24;
+}
+
+.text-success {
+    color: #34D399 !important;
+    -webkit-text-fill-color: #34D399;
+}
+
+.text-info {
+    color: #38BDF8 !important;
+    -webkit-text-fill-color: #38BDF8;
+}
+
+.text-primary {
+    color: #A78BFA !important;
+    -webkit-text-fill-color: #A78BFA;
 }
 
 .glow-text {
