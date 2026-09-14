@@ -14,8 +14,8 @@
     --accent-emerald: #10B981;
     --accent-blue: #3B82F6;
     --text-main: #FFFFFF;
-    --text-muted: #9CA3AF;
-    --text-subtle: #6B7280;
+    --text-muted: #C8D0DC;
+    --text-subtle: #A8B2C1;
     --glass: rgba(255, 255, 255, 0.03);
     --glass-card: rgba(20, 18, 30, 0.75);
     --glass-border: rgba(255, 255, 255, 0.09);
@@ -24,6 +24,42 @@
     --radius-sm: 12px;
     --radius-md: 20px;
     --radius-lg: 32px;
+}
+
+/* Readable helper text on dark backgrounds (override Bootstrap defaults) */
+.text-muted,
+.text-body-secondary,
+small.text-muted,
+.small.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.text-subtle,
+.small.text-subtle,
+small.text-subtle {
+    color: var(--text-subtle) !important;
+}
+
+.form-label,
+.form-text {
+    color: var(--text-muted) !important;
+}
+
+.form-control::placeholder,
+.form-select::placeholder,
+textarea.form-control::placeholder {
+    color: #9AA6B8 !important;
+    opacity: 1;
+}
+
+.form-control,
+.form-select {
+    color: var(--text-main) !important;
+}
+
+.form-select option {
+    color: #111827;
+    background: #fff;
 }
 
 * {
@@ -593,10 +629,16 @@ h1, h2, h3, h4, h5, .navbar-brand {
     gap: 6px;
     min-height: var(--support-strip-height, 34px);
     padding: 6px 16px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.04);
     border-bottom: 1px solid var(--glass-border);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
     z-index: 10;
+}
+
+.dashboard-support-strip .text-muted,
+.dashboard-support-strip .text-subtle {
+    color: var(--text-muted) !important;
 }
 
 .dashboard-support-strip a {
@@ -615,7 +657,7 @@ h1, h2, h3, h4, h5, .navbar-brand {
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
-    background: rgba(11, 10, 16, 0.88);
+    background: rgba(11, 10, 16, 0.92);
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(16px);
     border-radius: 999px;
@@ -625,6 +667,10 @@ h1, h2, h3, h4, h5, .navbar-brand {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.active-promotion-banner .text-muted {
+    color: var(--text-muted) !important;
 }
 
 .promotion-list-item {
