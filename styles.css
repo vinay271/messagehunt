@@ -585,6 +585,40 @@ h1, h2, h3, h4, h5, .navbar-brand {
     color: #fff !important;
 }
 
+.active-promotion-banner {
+    position: fixed;
+    top: calc(var(--header-height) + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(11, 10, 16, 0.88);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(16px);
+    border-radius: 999px;
+    padding: 8px 18px;
+    color: var(--text-main);
+    max-width: min(90vw, 520px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.promotion-list-item {
+    text-align: left;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    color: var(--text-main);
+    transition: var(--transition);
+}
+
+.promotion-list-item:hover,
+.promotion-list-item.active {
+    border-color: var(--primary-bright);
+    background: rgba(124, 58, 237, 0.12);
+}
+
 .coin-package-badge {
     position: absolute;
     top: -12px;

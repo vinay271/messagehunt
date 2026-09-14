@@ -208,6 +208,14 @@
             transform: translateY(-2px);
         }
 
+        .btn-send:disabled,
+        .btn-send:disabled:hover {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         .custom-popup .leaflet-popup-content-wrapper {
             background: rgba(17, 14, 28, 0.92);
             backdrop-filter: blur(14px);
@@ -247,6 +255,9 @@
         </div>
 
         <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-outline-glass rounded-4 px-3" id="myPromotionsBtn">
+                <i data-lucide="megaphone" style="width: 16px; height: 16px;"></i> My Promotions
+            </button>
             <button class="btn btn-sm btn-accent px-3 rounded-4 fw-bold" data-bs-toggle="modal" data-bs-target="#buyCoinsModal">
                 <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i> Buy Coins
             </button>
@@ -256,6 +267,10 @@
 
     <!-- Map Viewport -->
     <div id="map"></div>
+    <div id="activePromotionBanner" class="active-promotion-banner d-none">
+        <span class="text-muted small me-2">Showing</span>
+        <strong id="activePromotionLabel">—</strong>
+    </div>
 
     <!-- Floating Action Buttons -->
     <div class="action-bar-floating">
@@ -427,11 +442,17 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body pt-3">
+                    <div class="mb-3">
+                        <label class="form-label" for="promotionNameInput">Promotion name <span class="text-danger">*</span></label>
+                        <input type="text" id="promotionNameInput" class="form-control" maxlength="80" required placeholder="e.g. Diwali Mumbai Blitz" autocomplete="off">
+                        <div id="promotionNameError" class="text-danger small mt-1 d-none">Please enter a promotion name.</div>
+                    </div>
                     <div class="row mb-3">
                         <div class="col-12">
                             <label class="form-label">Total Coins / Points to Drop</label>
                             <input type="number" id="dropPointsInput" class="form-control" placeholder="Enter points (e.g. 1000)" min="50" value="500" step="1">
                             <small class="text-subtle" style="font-size:0.75rem;">Distributed using the point sizes you select below</small>
+                            <div id="dropPointsBalanceError" class="text-danger small mt-1 d-none"></div>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -497,7 +518,7 @@
                         <input type="url" id="smileLink" class="form-control" placeholder="https://yourbrand.com/promo">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Promotional Banner / Photo</label>
+                        <label class="form-label">Promotional Banner / Photo <span class="text-muted">(optional)</span></label>
                         <input type="file" id="smilePhoto" class="form-control" accept="image/*">
                     </div>
                 </div>
@@ -505,6 +526,26 @@
                     <button id="sendSmileBtn" class="btn-send">
                         <i data-lucide="send"></i> Distribute Coins Now
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Promotions Modal -->
+    <div class="modal fade" id="myPromotionsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h3 class="modal-title gradient-text-purple mb-1">My Promotions</h3>
+                        <p class="text-muted small mb-0">Select a promotion to show only its drops on the map.</p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <div id="myPromotionsList" class="d-flex flex-column gap-2">
+                        <div class="text-muted small">Loading…</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -549,6 +590,7 @@
         lucide.createIcons();
         const supabaseClient = supabase.createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_ANON_KEY);
         window.supabaseClient = supabaseClient;
+        window.currentUserPoints = 0;
 
         // --- Buy Coins lead request flow ---
         const buyCoinsState = {
@@ -845,6 +887,7 @@
         async function syncUserProfile(authUser) {
             window.currentUserId = authUser.id;
             window.currentUserEmail = authUser.email || '';
+            window.currentUserPoints = 0;
             const metaName = authUser.user_metadata?.full_name || authUser.user_metadata?.name || (authUser.email ? authUser.email.split('@')[0] : 'Creator');
             const metaPhoto = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || ('https://i.pravatar.cc/150?u=' + authUser.id);
             window.currentUserName = metaName;
@@ -908,7 +951,9 @@
                 };
             }
             if (points !== undefined && points !== null && pointsEl) {
-                pointsEl.textContent = Number(points).toLocaleString();
+                window.currentUserPoints = Number(points) || 0;
+                pointsEl.textContent = window.currentUserPoints.toLocaleString();
+                if (typeof updateDropFormValidity === 'function') updateDropFormValidity();
             }
         }
 
@@ -1060,64 +1105,248 @@
             modal.show();
         };
 
+        window.activePromotionId = null;
+        window.activePromotionName = null;
+
+        function updateActivePromotionBanner() {
+            const banner = document.getElementById('activePromotionBanner');
+            const label = document.getElementById('activePromotionLabel');
+            if (!banner || !label) return;
+            if (window.activePromotionId && window.activePromotionName) {
+                label.textContent = window.activePromotionName;
+                banner.classList.remove('d-none');
+            } else {
+                banner.classList.add('d-none');
+            }
+        }
+
+        async function setActivePromotion(promotion, { persist = true } = {}) {
+            if (!promotion) {
+                window.activePromotionId = null;
+                window.activePromotionName = null;
+            } else {
+                window.activePromotionId = promotion.id;
+                window.activePromotionName = promotion.name;
+                if (persist) {
+                    try { localStorage.setItem('mh_active_promotion_id', promotion.id); } catch (e) {}
+                }
+            }
+            updateActivePromotionBanner();
+            await loadDrops();
+        }
+
+        async function fetchUserPromotions() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return [];
+            const { data, error } = await supabaseClient
+                .from('promotions')
+                .select('id, name, state_code, total_points, drop_count, created_at, photo_url')
+                .eq('distributor_id', user.id)
+                .order('created_at', { ascending: false });
+            if (error) {
+                console.error('Failed to load promotions:', error);
+                return [];
+            }
+            return data || [];
+        }
+
+        function renderPromotionsList(promotions) {
+            const list = document.getElementById('myPromotionsList');
+            if (!list) return;
+            if (!promotions.length) {
+                list.innerHTML = '<div class="text-muted small p-2">No promotions yet. Drop coins to create your first campaign.</div>';
+                return;
+            }
+            list.innerHTML = promotions.map((p) => {
+                const created = p.created_at ? new Date(p.created_at).toLocaleString() : '';
+                const active = p.id === window.activePromotionId ? 'active' : '';
+                return `
+                    <button type="button" class="promotion-list-item ${active}" data-promotion-id="${p.id}">
+                        <div class="fw-bold text-white mb-1">${(p.name || 'Untitled').replace(/</g, '&lt;')}</div>
+                        <div class="small text-muted">${p.state_code || '—'} · ${(p.total_points || 0).toLocaleString()} PTS · ${p.drop_count || 0} drops</div>
+                        <div class="small text-subtle mt-1">${created}</div>
+                    </button>
+                `;
+            }).join('');
+
+            list.querySelectorAll('[data-promotion-id]').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const promo = promotions.find((p) => p.id === btn.dataset.promotionId);
+                    if (!promo) return;
+                    await setActivePromotion(promo);
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('myPromotionsModal'));
+                    if (modal) modal.hide();
+                });
+            });
+        }
+
+        async function openMyPromotions() {
+            const list = document.getElementById('myPromotionsList');
+            if (list) list.innerHTML = '<div class="text-muted small">Loading…</div>';
+            const modal = new bootstrap.Modal(document.getElementById('myPromotionsModal'));
+            modal.show();
+            const promotions = await fetchUserPromotions();
+            renderPromotionsList(promotions);
+        }
+
+        async function initPromotionsAndMap() {
+            const promotions = await fetchUserPromotions();
+            let selected = null;
+            try {
+                const savedId = localStorage.getItem('mh_active_promotion_id');
+                if (savedId) selected = promotions.find((p) => p.id === savedId) || null;
+            } catch (e) {}
+            if (!selected && promotions.length) selected = promotions[0]; // latest
+            await setActivePromotion(selected, { persist: !!selected });
+        }
+
         async function loadDrops() {
             try {
                 const { data: { user } } = await supabaseClient.auth.getUser();
-                const userId = user ? user.id : 'demo-creator-uid';
+                if (!user) return;
 
-                const { data: selectData } = await supabaseClient
+                markers.forEach((marker) => map.removeLayer(marker));
+                markers.clear();
+
+                if (!window.activePromotionId) {
+                    updateActivePromotionBanner();
+                    return;
+                }
+
+                const { data: selectData, error } = await supabaseClient
                     .from('promotional_drops')
-                    .select('id, points, distributor_name, distributor_photo, distributor_link, collected_by, location')
-                    .eq('distributor_id', userId);
+                    .select('id, points, distributor_name, distributor_photo, distributor_link, collected_by, location, promotion_id')
+                    .eq('distributor_id', user.id)
+                    .eq('promotion_id', window.activePromotionId);
 
-                if (selectData) {
-                    markers.forEach((marker) => map.removeLayer(marker));
-                    markers.clear();
-                    selectData.forEach(drop => addMarker(drop));
+                if (error) {
+                    console.error('Failed to load drops:', error);
+                    return;
+                }
+
+                (selectData || []).forEach((drop) => addMarker(drop));
+
+                if (selectData && selectData.length) {
+                    const group = [];
+                    selectData.forEach((drop) => {
+                        const coords = drop.location ? parseHexEWKB(drop.location) : null;
+                        if (coords) group.push([coords.lat, coords.lng]);
+                    });
+                    if (group.length) {
+                        try { map.fitBounds(group, { padding: [40, 40], maxZoom: 12 }); } catch (e) {}
+                    }
                 }
             } catch (err) {
                 console.error('Failed to load drops:', err);
             }
         }
 
-        setTimeout(loadDrops, 1000);
+        function getSelectedDropDenominations() {
+            return Array.from(document.querySelectorAll('.drop-denom-btn.active'))
+                .map((btn) => parseInt(btn.dataset.points, 10))
+                .filter((n) => [10, 25, 50, 75, 100].includes(n))
+                .sort((a, b) => a - b);
+        }
+
+        /** Build exact drop sizes from total + selected denominations. */
+        function planDropSizes(total, selected) {
+            const allowed = [...new Set(selected)].filter((n) => [10, 25, 50, 75, 100].includes(n)).sort((a, b) => a - b);
+            if (!total || allowed.length === 0) {
+                return { ok: false, reason: 'Select at least one points-per-drop value.' };
+            }
+            if (total < Math.min(...allowed)) {
+                return { ok: false, reason: `Total must be at least ${Math.min(...allowed)} PTS.` };
+            }
+
+            const sizes = [];
+            let remaining = total;
+            const setCost = allowed.reduce((sum, n) => sum + n, 0);
+            const sets = Math.floor(remaining / setCost);
+            for (let i = 0; i < sets; i++) {
+                allowed.forEach((n) => sizes.push(n));
+            }
+            remaining -= sets * setCost;
+
+            const desc = [...allowed].sort((a, b) => b - a);
+            for (const n of desc) {
+                while (remaining >= n) {
+                    sizes.push(n);
+                    remaining -= n;
+                }
+            }
+
+            if (remaining !== 0) {
+                return {
+                    ok: false,
+                    reason: `Cannot split ${total} PTS using ${allowed.join(', ')}. Adjust total or selection.`
+                };
+            }
+
+            const summary = {};
+            sizes.forEach((n) => { summary[n] = (summary[n] || 0) + 1; });
+            return { ok: true, sizes, summary, dropCount: sizes.length };
+        }
+
+        function formatDropPlanSummary(summary) {
+            return Object.keys(summary)
+                .map(Number)
+                .sort((a, b) => a - b)
+                .map((n) => `${summary[n]}×${n}`)
+                .join(', ');
+        }
 
         async function sendSmile() {
             const amountInput = document.getElementById('dropPointsInput');
             const stateSelect = document.getElementById('dropStateSelect');
             const photoInput = document.getElementById('smilePhoto');
             const linkInput = document.getElementById('smileLink');
+            const nameInput = document.getElementById('promotionNameInput');
             const sendBtn = document.getElementById('sendSmileBtn');
-            const activeDenom = document.querySelector('.drop-denom-btn.active');
 
             const totalPoints = parseInt(amountInput.value, 10);
-            const pointsPerDrop = activeDenom ? parseInt(activeDenom.dataset.points, 10) : 50;
+            const selectedDenoms = getSelectedDropDenominations();
+            const plan = planDropSizes(totalPoints, selectedDenoms);
             const stateCode = stateSelect.value;
             const link = linkInput.value;
-            let photoUrl = "";
+            const promotionName = (nameInput && nameInput.value ? nameInput.value : '').trim();
+            let photoUrl = null;
+            const nameErrorEl = document.getElementById('promotionNameError');
+
+            const clearPromotionNameError = () => {
+                if (nameErrorEl) nameErrorEl.classList.add('d-none');
+                if (nameInput) nameInput.classList.remove('is-invalid');
+            };
+
+            const showPromotionNameError = () => {
+                if (nameErrorEl) nameErrorEl.classList.remove('d-none');
+                if (nameInput) {
+                    nameInput.classList.add('is-invalid');
+                    nameInput.focus();
+                }
+            };
+
+            if (!promotionName) {
+                showPromotionNameError();
+                return;
+            }
+            clearPromotionNameError();
 
             if (!totalPoints || !stateCode) {
                 alert('Please enter points and select a state in India.');
                 return;
             }
 
-            if (![10, 25, 50, 75, 100].includes(pointsPerDrop)) {
-                alert('Please select points per drop (10, 25, 50, 75, or 100).');
-                return;
-            }
-
-            if (totalPoints < pointsPerDrop) {
-                alert(`Total points must be at least ${pointsPerDrop}.`);
-                return;
-            }
-
-            if (totalPoints % pointsPerDrop !== 0) {
-                alert(`Total points must be a multiple of ${pointsPerDrop}. Example: ${pointsPerDrop * Math.ceil(totalPoints / pointsPerDrop)}.`);
+            if (!updateDropFormValidity()) {
+                const available = Number(window.currentUserPoints) || 0;
+                if (Number.isFinite(totalPoints) && totalPoints > available) {
+                    amountInput.focus();
+                }
                 return;
             }
 
             const originalBtnHtml = sendBtn ? sendBtn.innerHTML : '';
             if (sendBtn) {
+                sendBtn.dataset.submitting = '1';
                 sendBtn.disabled = true;
                 sendBtn.textContent = 'Distributing…';
             }
@@ -1130,7 +1359,8 @@
                 }
                 const userId = user.id;
 
-                if (photoInput.files && photoInput.files.length > 0) {
+                const hasPhoto = photoInput.files && photoInput.files.length > 0;
+                if (hasPhoto) {
                     const file = photoInput.files[0];
                     const fileExt = file.name.split('.').pop();
                     const filePath = `${userId}/${Date.now()}.${fileExt}`;
@@ -1141,7 +1371,7 @@
 
                     if (uploadError) {
                         console.error('Promotion photo upload failed:', uploadError);
-                        alert('Something went wrong. Try again.');
+                        alert('Something went wrong uploading the photo. Try again.');
                         return;
                     }
 
@@ -1149,39 +1379,46 @@
                         .from('promotion')
                         .getPublicUrl(filePath);
 
-                    photoUrl = publicData && publicData.publicUrl ? publicData.publicUrl : '';
+                    photoUrl = publicData && publicData.publicUrl ? publicData.publicUrl : null;
                     if (!photoUrl) {
                         console.error('Promotion photo public URL missing after upload');
-                        alert('Something went wrong. Try again.');
+                        alert('Something went wrong uploading the photo. Try again.');
                         return;
                     }
                 }
 
-                const { data, error } = await supabaseClient.rpc('distribute_promotional_drops', {
+                const { data, error } = await supabaseClient.rpc('distribute_promotional_drops_v2', {
                     total_points_to_drop: totalPoints,
                     target_state_code: stateCode,
+                    promotion_name: promotionName,
                     photo_url: photoUrl,
-                    secret_link: link,
-                    points_per_drop: pointsPerDrop
+                    secret_link: (link && link.trim()) ? link.trim() : null,
+                    points_per_drop_options: selectedDenoms
                 });
 
                 if (error) {
-                    console.error('distribute_promotional_drops failed:', error);
-                    if ((error.message || '').includes('reward_points')) {
+                    console.error('distribute_promotional_drops_v2 failed:', error);
+                    const msg = error.message || '';
+                    if (msg.includes('Could not find the function') || error.code === 'PGRST202') {
+                        alert('Server function missing. Run sql/promotions_and_distribute_v2.sql in Supabase, then try again.');
+                    } else if (msg.includes('reward_points')) {
                         alert('Something went wrong. Try again. If this keeps happening, the points security rule on the server needs a fix.');
-                    } else if ((error.message || '').toLowerCase().includes('insufficient')) {
-                        alert(error.message);
+                    } else if (msg.toLowerCase().includes('insufficient')) {
+                        alert(msg);
                     } else {
-                        alert(error.message || 'Something went wrong. Try again.');
+                        alert(msg || 'Something went wrong. Try again.');
                     }
                     return;
                 }
 
-                loadDrops();
+                await setActivePromotion({
+                    id: data.promotion_id,
+                    name: data.promotion_name || promotionName
+                });
                 checkSession();
 
-                const dropCount = data && data.drop_count != null ? data.drop_count : (totalPoints / pointsPerDrop);
-                alert(`Success! Created ${dropCount} drops of ${pointsPerDrop} PTS each in ${stateCode}.`);
+                const dropCount = data && data.drop_count != null ? data.drop_count : plan.dropCount;
+                alert(`Success! Created ${dropCount} drops (${formatDropPlanSummary(plan.summary)}) in ${stateCode}.`);
 
                 if (document.activeElement && typeof document.activeElement.blur === 'function') {
                     document.activeElement.blur();
@@ -1189,12 +1426,15 @@
                 const modal = bootstrap.Modal.getInstance(document.getElementById('dropCoinsModal'));
                 if (modal) modal.hide();
 
+                if (nameInput) nameInput.value = '';
                 linkInput.value = '';
                 photoInput.value = '';
                 amountInput.value = '500';
                 stateSelect.value = '';
                 document.querySelectorAll('.drop-denom-btn').forEach((btn) => {
-                    btn.classList.toggle('active', btn.dataset.points === '50');
+                    const isDefault = btn.dataset.points === '50';
+                    btn.classList.toggle('active', isDefault);
+                    btn.setAttribute('aria-pressed', isDefault ? 'true' : 'false');
                 });
                 updateDropDistributionPreview();
             } catch (err) {
@@ -1202,9 +1442,10 @@
                 alert('Something went wrong. Try again.');
             } finally {
                 if (sendBtn) {
-                    sendBtn.disabled = false;
+                    delete sendBtn.dataset.submitting;
                     sendBtn.innerHTML = originalBtnHtml;
                     lucide.createIcons();
+                    updateDropFormValidity();
                 }
             }
         }
@@ -1212,44 +1453,91 @@
         function updateDropDistributionPreview() {
             const amountInput = document.getElementById('dropPointsInput');
             const preview = document.getElementById('dropDistributionPreview');
-            const activeDenom = document.querySelector('.drop-denom-btn.active');
-            if (!preview || !amountInput || !activeDenom) return;
+            if (!preview || !amountInput) {
+                updateDropFormValidity();
+                return;
+            }
 
             const total = parseInt(amountInput.value, 10);
-            const perDrop = parseInt(activeDenom.dataset.points, 10);
+            const selected = getSelectedDropDenominations();
 
-            if (!total || !perDrop) {
-                preview.textContent = 'Enter a total and select points per drop.';
+            if (!selected.length) {
+                preview.textContent = 'Select at least one points-per-drop value.';
+                preview.classList.add('text-warning');
+                preview.classList.remove('text-muted');
+                updateDropFormValidity();
+                return;
+            }
+
+            if (!total) {
+                preview.textContent = `Selected: ${selected.join(', ')} PTS. Enter a total to preview.`;
                 preview.classList.remove('text-warning');
                 preview.classList.add('text-muted');
+                updateDropFormValidity();
                 return;
             }
 
-            if (total < perDrop) {
-                preview.textContent = `Total must be at least ${perDrop} PTS.`;
+            const plan = planDropSizes(total, selected);
+            if (!plan.ok) {
+                preview.textContent = plan.reason;
                 preview.classList.add('text-warning');
                 preview.classList.remove('text-muted');
+                updateDropFormValidity();
                 return;
             }
 
-            if (total % perDrop !== 0) {
-                const suggested = perDrop * Math.ceil(total / perDrop);
-                preview.textContent = `Total must be a multiple of ${perDrop}. Try ${suggested} PTS → ${suggested / perDrop} drops.`;
-                preview.classList.add('text-warning');
-                preview.classList.remove('text-muted');
-                return;
-            }
-
-            const drops = total / perDrop;
-            preview.textContent = `${total.toLocaleString()} PTS → ${drops} drop${drops === 1 ? '' : 's'} of ${perDrop} PTS each`;
+            preview.textContent = `${total.toLocaleString()} PTS → ${plan.dropCount} drops (${formatDropPlanSummary(plan.summary)})`;
             preview.classList.remove('text-warning');
             preview.classList.add('text-muted');
+            updateDropFormValidity();
+        }
+
+        function updateDropFormValidity() {
+            const amountInput = document.getElementById('dropPointsInput');
+            const balanceError = document.getElementById('dropPointsBalanceError');
+            const sendBtn = document.getElementById('sendSmileBtn');
+            const available = Number(window.currentUserPoints) || 0;
+            const total = amountInput ? parseInt(amountInput.value, 10) : NaN;
+            const selected = getSelectedDropDenominations();
+            const plan = planDropSizes(total, selected);
+
+            let balanceOk = true;
+            if (amountInput && balanceError) {
+                if (Number.isFinite(total) && total > 0 && total > available) {
+                    balanceOk = false;
+                    balanceError.textContent = `You only have ${available.toLocaleString()} PTS. Enter ${available.toLocaleString()} or less.`;
+                    balanceError.classList.remove('d-none');
+                    amountInput.classList.add('is-invalid');
+                } else {
+                    balanceError.textContent = '';
+                    balanceError.classList.add('d-none');
+                    amountInput.classList.remove('is-invalid');
+                }
+            }
+
+            const canDistribute = balanceOk && plan.ok;
+            if (sendBtn && !sendBtn.dataset.submitting) {
+                sendBtn.disabled = !canDistribute;
+                sendBtn.setAttribute('aria-disabled', canDistribute ? 'false' : 'true');
+                sendBtn.title = canDistribute
+                    ? ''
+                    : (!balanceOk
+                        ? 'Points to drop exceed your balance'
+                        : (plan.reason || 'Fix the form to distribute coins'));
+            }
+
+            return canDistribute;
         }
 
         document.querySelectorAll('.drop-denom-btn').forEach((btn) => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.drop-denom-btn').forEach((b) => b.classList.remove('active'));
-                btn.classList.add('active');
+                btn.classList.toggle('active');
+                btn.setAttribute('aria-pressed', btn.classList.contains('active') ? 'true' : 'false');
+                // Keep at least one selected
+                if (!document.querySelector('.drop-denom-btn.active')) {
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-pressed', 'true');
+                }
                 updateDropDistributionPreview();
             });
         });
@@ -1258,12 +1546,33 @@
         if (dropPointsInputEl) {
             dropPointsInputEl.addEventListener('input', updateDropDistributionPreview);
         }
+        const promotionNameInputEl = document.getElementById('promotionNameInput');
+        if (promotionNameInputEl) {
+            promotionNameInputEl.addEventListener('input', () => {
+                const err = document.getElementById('promotionNameError');
+                if (err) err.classList.add('d-none');
+                promotionNameInputEl.classList.remove('is-invalid');
+            });
+        }
         updateDropDistributionPreview();
 
-        document.getElementById('sendSmileBtn').addEventListener('click', sendSmile);
+        document.getElementById('sendSmileBtn').addEventListener('click', (e) => {
+            if (!updateDropFormValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+            sendSmile();
+        });
+
+        const myPromotionsBtn = document.getElementById('myPromotionsBtn');
+        if (myPromotionsBtn) myPromotionsBtn.addEventListener('click', openMyPromotions);
+
+        // Load latest (or saved) promotion drops after map is ready
+        setTimeout(initPromotionsAndMap, 800);
 
         // Avoid aria-hidden + focused-descendant warnings when Bootstrap closes modals
-        ['buyCoinsModal', 'dropCoinsModal', 'userProfileModal'].forEach((id) => {
+        ['buyCoinsModal', 'dropCoinsModal', 'userProfileModal', 'myPromotionsModal'].forEach((id) => {
             const el = document.getElementById(id);
             if (!el) return;
             el.addEventListener('hide.bs.modal', () => {
@@ -1272,6 +1581,13 @@
                 }
             });
         });
+
+        const dropCoinsModalEl = document.getElementById('dropCoinsModal');
+        if (dropCoinsModalEl) {
+            dropCoinsModalEl.addEventListener('show.bs.modal', () => {
+                updateDropFormValidity();
+            });
+        }
     </script>
 </body>
 
