@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.supabase.co https://*.gstatic.com https://cdn.jsdelivr.net https://unpkg.com; img-src 'self' data: https://*.supabase.co https://*.gstatic.com https://i.pravatar.cc https://*.googleusercontent.com https://*.openstreetmap.org; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
+        content="default-src 'self' https://*.supabase.co https://*.gstatic.com https://cdn.jsdelivr.net https://unpkg.com; img-src 'self' data: https://*.supabase.co https://*.gstatic.com https://i.pravatar.cc https://*.googleusercontent.com https://*.openstreetmap.org; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com;">
     <meta name="description"
         content="Sign in to MessageHunt Business Creator Portal - Buy coins and promote your brand across India.">
     <title>Creator Portal Login - MessageHunt</title>
@@ -167,10 +167,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module">
-        import config from './config.js';
-
+    <script src="config.js?v=2"></script>
+    <script>
         lucide.createIcons();
+        const config = window.APP_CONFIG;
         const supabaseClient = supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
 
         function checkAuthErrorInUrl() {

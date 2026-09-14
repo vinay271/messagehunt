@@ -6,5 +6,3 @@ const config = {
 if (typeof window !== 'undefined') {
     window.APP_CONFIG = config;
 }
-
-export default config;
