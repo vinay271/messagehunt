@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.supabase.co https://*.gstatic.com https://cdn.jsdelivr.net https://unpkg.com https://server.arcgisonline.com; img-src 'self' data: https://*.supabase.co https://*.gstatic.com https://i.pravatar.cc https://*.googleusercontent.com https://*.openstreetmap.org https://server.arcgisonline.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
+        content="default-src 'self' https://*.supabase.co https://*.gstatic.com https://cdn.jsdelivr.net https://unpkg.com https://server.arcgisonline.com; img-src 'self' data: https://*.supabase.co https://*.gstatic.com https://i.pravatar.cc https://ui-avatars.com https://*.googleusercontent.com https://*.openstreetmap.org https://server.arcgisonline.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
     <title>Creator & Business Dashboard - MessageHunt</title>
     <link rel="icon" type="image/png" href="ic_launcher.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,20 +16,16 @@
         /* Session Guard */
         body {
             display: none;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            height: 100vh;
+            flex-direction: column;
+            margin: 0;
+            overflow: hidden;
         }
 
         :root {
             --header-height: 84px;
-        }
-
-        body {
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            margin: 0;
-            overflow: hidden;
         }
 
         header {
@@ -232,14 +228,14 @@
     <header>
         <div class="user-profile">
             <div class="user-photo-container">
-                <img src="https://i.pravatar.cc/150?u=creator" alt="User Photo" class="user-photo">
+                <img src="https://i.pravatar.cc/150?u=creator" alt="User Photo" class="user-photo" id="userPhoto" referrerpolicy="no-referrer">
             </div>
             <div class="user-details">
-                <span class="user-name">Business Creator</span>
+                <span class="user-name" id="userName">Business Creator</span>
                 <div class="mt-1">
                     <span class="coin-balance-pill" title="Promotional Coins Balance">
                         <i data-lucide="coins" style="width: 15px; height: 15px;"></i>
-                        <span id="userCoinBalance">25,000</span> PTS
+                        <span id="userCoinBalance">0</span> PTS
                     </span>
                 </div>
             </div>
@@ -254,7 +250,7 @@
             <button class="btn btn-sm btn-accent px-3 rounded-4 fw-bold" data-bs-toggle="modal" data-bs-target="#buyCoinsModal">
                 <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i> Buy Coins
             </button>
-            <button id="logoutBtn" onclick="handleLogout()" class="btn btn-sm btn-outline-glass rounded-4 px-3">Logout</button>
+            <a href="index.html" id="logoutBtn" onclick="localStorage.clear(); sessionStorage.clear(); if(window.supabaseClient && window.supabaseClient.auth) { window.supabaseClient.auth.signOut(); }" class="btn btn-sm btn-outline-glass rounded-4 px-3 text-decoration-none">Logout</a>
         </div>
     </header>
 
@@ -546,70 +542,89 @@
             const metaName = authUser.user_metadata?.full_name || authUser.user_metadata?.name || (authUser.email ? authUser.email.split('@')[0] : 'Creator');
             const metaPhoto = authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || ('https://i.pravatar.cc/150?u=' + authUser.id);
 
+            // Show Google name/photo immediately; points wait for the users table
+            updateUI(metaName, metaPhoto);
+
             let displayName = metaName;
             let photoUrl = metaPhoto;
+            let rewardPoints = 0;
 
             try {
-                // Fetch profile data from Supabase 'users' table
-                const { data: existingUser } = await supabaseClient
+                const { data: existingUser, error: fetchError } = await supabaseClient
                     .from('users')
                     .select('name, photo_url, reward_points')
                     .eq('uuid', authUser.id)
                     .maybeSingle();
 
-                if (existingUser) {
+                if (fetchError) {
+                    console.warn('Failed to fetch user profile:', fetchError);
+                } else if (existingUser) {
                     if (existingUser.name) displayName = existingUser.name;
                     if (existingUser.photo_url) photoUrl = existingUser.photo_url;
-                    if (existingUser.  !== undefined && existingUser.reward_points !== null) {
+                    if (existingUser.reward_points !== undefined && existingUser.reward_points !== null) {
                         rewardPoints = existingUser.reward_points;
-                    }else{
-                    rewardPoints = 0
                     }
                 } else {
-                    const newUser = {
-                        uuid: authUser.id,
-                        name: metaName,
-                        email: authUser.email || '',
-                        photo_url: metaPhoto
-                    };
-                    await supabaseClient.from('users').upsert([newUser], { onConflict: 'uuid' });
+                    const { error: upsertError } = await supabaseClient
+                        .from('users')
+                        .upsert([{
+                            uuid: authUser.id,
+                            name: metaName,
+                            email: authUser.email || '',
+                            photo_url: metaPhoto
+                        }], { onConflict: 'uuid' });
+
+                    if (upsertError) {
+                        console.warn('Failed to create user profile:', upsertError);
+                    }
                 }
             } catch (err) {
                 console.warn('Failed to sync profile with database:', err);
             }
 
-            // 2. Update UI with fetched database values
             updateUI(displayName, photoUrl, rewardPoints);
         }
 
         function updateUI(name, photoUrl, points) {
-            const nameEl = document.querySelector('.user-name');
-            const photoEl = document.querySelector('.user-photo');
+            const nameEl = document.getElementById('userName') || document.querySelector('.user-name');
+            const photoEl = document.getElementById('userPhoto') || document.querySelector('.user-photo');
             const pointsEl = document.getElementById('userCoinBalance');
 
             if (name && nameEl) nameEl.textContent = name;
             if (photoUrl && photoEl) {
+                photoEl.referrerPolicy = 'no-referrer';
                 photoEl.src = photoUrl;
                 photoEl.onerror = function() {
-                    this.src = 'https://i.pravatar.cc/150?u=fallback';
+                    this.onerror = null;
+                    this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=7c3aed&color=fff`;
                 };
             }
-            if (points !== undefined && pointsEl) pointsEl.textContent = Number(points).toLocaleString();
+            if (points !== undefined && points !== null && pointsEl) {
+                pointsEl.textContent = Number(points).toLocaleString();
+            }
         }
 
-        window.handleLogout = async function handleLogout() {
-            localStorage.removeItem('demo_user_session');
-            try {
-                await supabaseClient.auth.signOut();
-            } catch (e) {
-                console.error('Logout error:', e);
+        window.handleLogout = function handleLogout(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
-            window.location.href = 'index.html';
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                if (window.supabaseClient && window.supabaseClient.auth) {
+                    window.supabaseClient.auth.signOut().catch(() => {});
+                }
+            } catch (err) {
+                console.warn('Signout error:', err);
+            }
+            const targetHome = window.location.origin + window.location.pathname.replace('dashboard.html', 'index.html');
+            window.location.href = targetHome;
         };
 
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', window.handleLogout);
+            logoutBtn.onclick = window.handleLogout;
         }
 
         supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -618,7 +633,8 @@
                 window.currentUserEmail = session.user.email;
                 syncUserProfile(session.user);
             } else if (event === 'SIGNED_OUT') {
-                window.location.href = 'index.html';
+                const targetHome = window.location.origin + window.location.pathname.replace('dashboard.html', 'index.html');
+                window.location.href = targetHome;
             }
         });
 
