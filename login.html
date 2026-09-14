@@ -173,19 +173,54 @@
             const alertEl = document.getElementById('authErrorAlert');
             const btn = document.getElementById('googleSignInBtn');
 
-            function showAuthError(message, extraHtml) {
+            function showAuthError(message, showTroubleshooting) {
                 if (!alertEl) {
                     alert(message);
                     return;
                 }
-                alertEl.innerHTML = `
-                    <div class="auth-error-title">
-                        <i data-lucide="alert-triangle" style="width:18px;height:18px;"></i>
-                        Authentication Failed
-                    </div>
-                    <div>${message}</div>
-                    ${extraHtml || ''}
-                `;
+
+                alertEl.replaceChildren();
+
+                const title = document.createElement('div');
+                title.className = 'auth-error-title';
+                const icon = document.createElement('i');
+                icon.setAttribute('data-lucide', 'alert-triangle');
+                icon.style.width = '18px';
+                icon.style.height = '18px';
+                title.appendChild(icon);
+                title.appendChild(document.createTextNode(' Authentication Failed'));
+                alertEl.appendChild(title);
+
+                const body = document.createElement('div');
+                body.textContent = message || 'Google sign in failed';
+                alertEl.appendChild(body);
+
+                if (showTroubleshooting) {
+                    const steps = document.createElement('div');
+                    steps.className = 'auth-error-steps';
+
+                    const strong = document.createElement('strong');
+                    strong.textContent = 'How to resolve in Supabase & Google Cloud:';
+                    steps.appendChild(strong);
+
+                    const ol = document.createElement('ol');
+                    ol.className = 'ps-3 mb-0 mt-1';
+
+                    const items = [
+                        'Verify Google Client Secret in Supabase Dashboard → Auth → Providers → Google',
+                        `Set Authorized Redirect URI in Google Cloud Console: ${config.SUPABASE_URL}/auth/v1/callback`,
+                        `Add ${new URL('dashboard.html', window.location.href).href} to Supabase Auth Redirect URLs.`
+                    ];
+                    items.forEach((text) => {
+                        const li = document.createElement('li');
+                        li.textContent = text;
+                        ol.appendChild(li);
+                    });
+
+                    steps.appendChild(ol);
+                    alertEl.appendChild(steps);
+                }
+
                 alertEl.classList.remove('d-none');
                 if (window.lucide) lucide.createIcons();
             }
@@ -214,21 +249,21 @@
                 const errorDescription = searchParams.get('error_description') || hashParams.get('error_description');
 
                 if (error || errorDescription) {
-                    const decodedDesc = decodeURIComponent(errorDescription || error || 'Google sign in failed');
-                    let troubleshootingHtml = '';
-                    if (decodedDesc.includes('Unable to exchange external code') || decodedDesc.includes('4/0A')) {
-                        troubleshootingHtml = `
-                            <div class="auth-error-steps">
-                                <strong>How to resolve in Supabase & Google Cloud:</strong>
-                                <ol class="ps-3 mb-0 mt-1">
-                                    <li>Verify Google <em>Client Secret</em> in <strong>Supabase Dashboard &rarr; Auth &rarr; Providers &rarr; Google</strong></li>
-                                    <li>Set Authorized Redirect URI in <strong>Google Cloud Console</strong>: <code>${config.SUPABASE_URL}/auth/v1/callback</code></li>
-                                    <li>Add <code>${new URL('dashboard.html', window.location.href).href}</code> to <strong>Supabase Auth Redirect URLs</strong>.</li>
-                                </ol>
-                            </div>
-                        `;
+                    let decodedDesc = errorDescription || error || 'Google sign in failed';
+                    try {
+                        decodedDesc = decodeURIComponent(decodedDesc);
+                    } catch (e) {
+                        // keep raw value if decode fails
                     }
-                    showAuthError(decodedDesc, troubleshootingHtml);
+                    // Strip control chars / angle brackets so nothing HTML-like remains
+                    decodedDesc = String(decodedDesc)
+                        .replace(/[<>\u0000-\u001F\u007F]/g, ' ')
+                        .trim()
+                        .slice(0, 500);
+
+                    const needsHelp = decodedDesc.includes('Unable to exchange external code')
+                        || /4\/0A/.test(decodedDesc);
+                    showAuthError(decodedDesc, needsHelp);
                 }
             }
 
