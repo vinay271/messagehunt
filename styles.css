@@ -585,9 +585,33 @@ h1, h2, h3, h4, h5, .navbar-brand {
     color: #fff !important;
 }
 
+.dashboard-support-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: var(--support-strip-height, 34px);
+    padding: 6px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 0.75rem;
+    z-index: 10;
+}
+
+.dashboard-support-strip a {
+    color: var(--accent-bright);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.dashboard-support-strip a:hover {
+    text-decoration: underline;
+}
+
 .active-promotion-banner {
     position: fixed;
-    top: calc(var(--header-height) + 12px);
+    top: calc(var(--header-height) + var(--support-strip-height, 34px) + 12px);
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
