@@ -342,8 +342,11 @@
                         <div class="col-12 col-md-4">
                             <h6 class="text-white fw-bold mb-3">Legal & Support</h6>
                             <ul class="list-unstyled d-flex flex-column gap-2 small">
-                                <li><a href="privacy_policy.md" target="_blank" class="footer-link">Privacy Policy</a></li>
-                                <li><a href="mailto:messagehunt@gmail.com" class="footer-link">messagehunt@gmail.com</a></li>
+                                <li>
+                                    <a href="#legalModal" class="footer-link" data-bs-toggle="modal"
+                                        data-bs-target="#legalModal">Privacy Policy &amp; Terms</a>
+                                </li>
+                                <li><a href="mailto:huntmessage@gmail.com" class="footer-link">huntmessage@gmail.com</a></li>
                             </ul>
                             <p class="text-muted small mt-3 mb-0" style="max-width: 260px;">
                                 Creator portal points are promotional credits for in-app campaigns — not cash.
@@ -360,9 +363,254 @@
         </div>
     </footer>
 
+    <!-- Privacy Policy & Terms modal -->
+    <div class="modal fade" id="legalModal" tabindex="-1" aria-labelledby="legalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <div class="modal-content legal-modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h3 class="modal-title gradient-text-purple mb-1" id="legalModalLabel">Legal</h3>
+                        <p class="text-muted small mb-0">Terms &amp; Conditions and Privacy Policy</p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body legal-modal-body">
+                    <nav class="legal-jump-links" aria-label="Legal sections">
+                        <a href="#legal-terms">Terms &amp; Conditions</a>
+                        <a href="#legal-privacy">Privacy Policy</a>
+                    </nav>
+
+                    <section id="legal-terms" class="legal-section">
+                        <h4>Terms &amp; Conditions</h4>
+                        <p class="legal-updated">Last updated: September 14, 2026</p>
+                        <p>
+                            These Terms govern your use of MessageHunt — including the mobile app, website
+                            (messagehunt.in), and Creator Portal. By using MessageHunt, you agree to these Terms.
+                            If you do not agree, please do not use our services.
+                        </p>
+
+                        <h5>1. What MessageHunt is</h5>
+                        <ul>
+                            <li>
+                                <strong>Explorers</strong> use the mobile app to discover and collect real-world
+                                promotional coin drops near their location.
+                            </li>
+                            <li>
+                                <strong>Creators &amp; businesses</strong> use the Creator Portal to request promotional
+                                coins and place campaign drops on the map for explorers.
+                            </li>
+                        </ul>
+
+                        <h5>2. Accounts &amp; eligibility</h5>
+                        <ul>
+                            <li>You must provide accurate information and keep your account secure.</li>
+                            <li>Creator Portal sign-in uses Google authentication.</li>
+                            <li>You are responsible for activity under your account.</li>
+                            <li>You must be old enough to use the app under applicable store and local rules.</li>
+                        </ul>
+
+                        <h5>3. Promotional coins &amp; rewards</h5>
+                        <ul>
+                            <li>
+                                Portal “coins” / reward points are <strong>promotional credits</strong> for in-app
+                                campaigns. They are <strong>not cash</strong>, bank balance, or withdrawable funds.
+                            </li>
+                            <li>
+                                Buying coins may start as a request or lead. We may contact you to confirm details
+                                before credits are added.
+                            </li>
+                            <li>
+                                Drops, campaign content, photos, and secret links must be lawful and must not mislead
+                                users, promote illegal activity, or violate others’ rights.
+                            </li>
+                            <li>
+                                We may refuse, remove, or adjust campaigns, drops, or credits that appear abusive,
+                                fraudulent, or unsafe.
+                            </li>
+                        </ul>
+
+                        <h5>4. Acceptable use</h5>
+                        <ul>
+                            <li>Do not hack, scrape, reverse engineer, or disrupt MessageHunt.</li>
+                            <li>Do not create fake locations, spoof GPS, or game collection unfairly.</li>
+                            <li>Do not harass others or upload harmful, illegal, or infringing content.</li>
+                            <li>Do not use the service for spam or unauthorized advertising outside approved drops.</li>
+                        </ul>
+
+                        <h5>5. Location &amp; safety</h5>
+                        <ul>
+                            <li>
+                                Core explorer features need location access. Always stay aware of your surroundings
+                                and obey traffic and local laws while hunting.
+                            </li>
+                            <li>
+                                MessageHunt does not encourage entering private property or unsafe areas to collect drops.
+                            </li>
+                        </ul>
+
+                        <h5>6. Intellectual property</h5>
+                        <ul>
+                            <li>
+                                MessageHunt branding, app, and site content belong to MessageHunt / the developer,
+                                except content you upload for your campaigns.
+                            </li>
+                            <li>
+                                By uploading campaign photos or links, you grant us a license to display them in the
+                                app and portal as needed to run your promotion.
+                            </li>
+                        </ul>
+
+                        <h5>7. Disclaimer &amp; limitation</h5>
+                        <ul>
+                            <li>
+                                The service is provided “as is.” Availability, map accuracy, and drop discovery may
+                                vary by device, network, and location permissions.
+                            </li>
+                            <li>
+                                To the fullest extent allowed by law, MessageHunt is not liable for lost credits,
+                                missed collections, business outcomes, or indirect damages from using the service.
+                            </li>
+                        </ul>
+
+                        <h5>8. Changes &amp; contact</h5>
+                        <ul>
+                            <li>We may update these Terms. Continued use after changes means you accept the update.</li>
+                            <li>
+                                Questions:
+                                <a href="mailto:huntmessage@gmail.com">huntmessage@gmail.com</a>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <hr class="legal-divider">
+
+                    <section id="legal-privacy" class="legal-section">
+                        <h4>Privacy Policy</h4>
+                        <p class="legal-updated">Last updated: September 14, 2026</p>
+                        <p>
+                            This Privacy Policy explains what information MessageHunt collects, how we use it, and
+                            your choices. It covers the mobile app, website, and Creator Portal.
+                        </p>
+
+                        <h5>1. Information we collect</h5>
+                        <ul>
+                            <li>
+                                <strong>Account info:</strong> name, email, profile photo (for example from Google
+                                sign-in), and account identifiers.
+                            </li>
+                            <li>
+                                <strong>Location data:</strong> device location when you use map / hunt features so we
+                                can show nearby drops and verify collection where required.
+                            </li>
+                            <li>
+                                <strong>Campaign &amp; portal data:</strong> promotion names, drop locations, point
+                                amounts, optional photos/links, and coin purchase request details (business name,
+                                phone, notes, referral codes).
+                            </li>
+                            <li>
+                                <strong>Usage &amp; device data:</strong> basic app/site usage, crash or performance
+                                signals, and technical details needed to keep the service secure.
+                            </li>
+                        </ul>
+
+                        <h5>2. How we use information</h5>
+                        <ul>
+                            <li>Operate accounts, maps, drops, and promotional campaigns</li>
+                            <li>Process creator coin requests and support messages</li>
+                            <li>Show explorer profiles or collection details where the product design requires it</li>
+                            <li>Improve reliability, prevent abuse, and comply with law</li>
+                            <li>Contact you about your account, requests, or important service updates</li>
+                        </ul>
+
+                        <h5>3. Sharing</h5>
+                        <ul>
+                            <li>
+                                We use trusted processors such as authentication, hosting/database (e.g. Supabase),
+                                map tile providers, and app stores to run MessageHunt.
+                            </li>
+                            <li>
+                                Campaign content you publish (banners, links, drop areas) may be visible to explorers
+                                in the app.
+                            </li>
+                            <li>We do not sell your personal information.</li>
+                            <li>We may disclose information if required by law or to protect users and the service.</li>
+                        </ul>
+
+                        <h5>4. Location choices</h5>
+                        <ul>
+                            <li>
+                                You can turn off location permission in device settings. Core hunting features may not
+                                work without location.
+                            </li>
+                        </ul>
+
+                        <h5>5. Data retention &amp; security</h5>
+                        <ul>
+                            <li>
+                                We keep account and campaign data while your account is active and as needed for
+                                operations, support, and legal requirements.
+                            </li>
+                            <li>
+                                We use reasonable technical and organizational measures; no method of transmission or
+                                storage is 100% secure.
+                            </li>
+                        </ul>
+
+                        <h5>6. Children’s privacy</h5>
+                        <ul>
+                            <li>
+                                MessageHunt is not directed at children under the minimum age required by applicable
+                                app-store and privacy rules. If you believe a child provided data inappropriately,
+                                contact us to request deletion.
+                            </li>
+                        </ul>
+
+                        <h5>7. Your rights &amp; contact</h5>
+                        <ul>
+                            <li>
+                                Depending on your location, you may request access, correction, or deletion of personal
+                                data we hold about you.
+                            </li>
+                            <li>
+                                Privacy questions or requests:
+                                <a href="mailto:huntmessage@gmail.com">huntmessage@gmail.com</a>
+                            </li>
+                        </ul>
+
+                        <h5>8. Changes</h5>
+                        <ul>
+                            <li>
+                                We may update this Privacy Policy from time to time. The “Last updated” date above
+                                will change when we do.
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-glass rounded-4 px-4 fw-bold"
+                        data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         lucide.createIcons();
+
+        // Keep section jumps inside the modal scroll area
+        document.querySelectorAll('#legalModal .legal-jump-links a').forEach((link) => {
+            link.addEventListener('click', (e) => {
+                const id = link.getAttribute('href');
+                const target = id ? document.querySelector(id) : null;
+                const body = document.querySelector('#legalModal .modal-body');
+                if (!target || !body) return;
+                e.preventDefault();
+                const top = target.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - 8;
+                body.scrollTo({ top, behavior: 'smooth' });
+            });
+        });
     </script>
 </body>
 

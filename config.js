@@ -4,7 +4,7 @@ const config = {
 
     // Support (shown in Buy Coins success + site footer)
     ADMIN_WHATSAPP: '', // optional: digits only with country code, e.g. 9198XXXXXXXX
-    SUPPORT_EMAIL: 'messagehunt@gmail.com',
+    SUPPORT_EMAIL: 'huntmessage@gmail.com',
 
     // Optional: Zapier / Make / Slack incoming webhook URL to ping you on new requests
     NOTIFY_WEBHOOK_URL: '',
