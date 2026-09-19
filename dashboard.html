@@ -1255,7 +1255,7 @@
             if (!user) return [];
             const { data, error } = await supabaseClient
                 .from('promotions')
-                .select('id, name, state_code, total_points, drop_count, created_at, photo_url')
+                .select('id, name, state_code, total_points, drop_count, created_at, photo_url, secret_link')
                 .eq('distributor_id', user.id)
                 .order('created_at', { ascending: false });
             if (error) {
@@ -1263,6 +1263,41 @@
                 return [];
             }
             return data || [];
+        }
+
+        function safeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function safeFormatUrl(urlStr) {
+            if (!urlStr) return '';
+            let trimmed = urlStr.trim();
+            if (!trimmed) return '';
+            if (/^https?:\/\//i.test(trimmed) || /^data:/i.test(trimmed) || /^\/\//i.test(trimmed)) {
+                return trimmed;
+            }
+            return 'https://' + trimmed;
+        }
+
+        function isImageUrl(urlStr) {
+            if (!urlStr) return false;
+            const clean = urlStr.split('?')[0].toLowerCase();
+            return (
+                clean.endsWith('.jpg') ||
+                clean.endsWith('.jpeg') ||
+                clean.endsWith('.png') ||
+                clean.endsWith('.gif') ||
+                clean.endsWith('.webp') ||
+                clean.endsWith('.svg') ||
+                clean.includes('/storage/v1/object/public/') ||
+                urlStr.startsWith('data:image/')
+            );
         }
 
         function renderPromotionsList(promotions) {
@@ -1275,24 +1310,63 @@
             list.innerHTML = promotions.map((p) => {
                 const created = p.created_at ? new Date(p.created_at).toLocaleString() : '';
                 const active = p.id === window.activePromotionId ? 'active' : '';
+
+                let photoUrl = p.photo_url ? p.photo_url.trim() : null;
+                const secretLink = p.secret_link ? p.secret_link.trim() : null;
+                const formattedLink = secretLink ? safeFormatUrl(secretLink) : null;
+
+                if (!photoUrl && secretLink && isImageUrl(secretLink)) {
+                    photoUrl = secretLink;
+                }
+
+                const imageHtml = photoUrl ? `
+                    <div class="promo-img-container mb-2">
+                        <img src="${safeHtml(photoUrl)}" alt="${safeHtml(p.name || 'Promotion Banner')}" loading="lazy" onerror="this.parentElement.style.display='none';">
+                    </div>
+                ` : '';
+
+                const linkHtml = formattedLink ? `
+                    <div class="mt-2 pt-1">
+                        <a href="${safeHtml(formattedLink)}" target="_blank" rel="noopener noreferrer" class="promo-link-btn" onclick="event.stopPropagation();">
+                            <i data-lucide="external-link" style="width:14px; height:14px; flex-shrink:0;"></i>
+                            <span class="text-truncate" style="max-width: 280px; display: inline-block; vertical-align: middle;">${safeHtml(secretLink)}</span>
+                        </a>
+                    </div>
+                ` : '';
+
                 return `
-                    <button type="button" class="promotion-list-item ${active}" data-promotion-id="${p.id}">
-                        <div class="fw-bold text-white mb-1">${(p.name || 'Untitled').replace(/</g, '&lt;')}</div>
-                        <div class="small text-muted">${p.state_code || '—'} · ${(p.total_points || 0).toLocaleString()} PTS · ${p.drop_count || 0} drops</div>
-                        <div class="small text-muted mt-1">${created}</div>
-                    </button>
+                    <div role="button" tabindex="0" class="promotion-list-item ${active}" data-promotion-id="${p.id}">
+                        ${imageHtml}
+                        <div class="fw-bold text-white mb-1" style="font-size:1.02rem;">${safeHtml(p.name || 'Untitled')}</div>
+                        <div class="small text-muted">${safeHtml(p.state_code || '—')} · ${(p.total_points || 0).toLocaleString()} PTS · ${p.drop_count || 0} drops</div>
+                        <div class="small text-muted mt-1" style="font-size:0.75rem;">${created}</div>
+                        ${linkHtml}
+                    </div>
                 `;
             }).join('');
 
             list.querySelectorAll('[data-promotion-id]').forEach((btn) => {
-                btn.addEventListener('click', async () => {
+                const handleSelect = async (e) => {
+                    if (e.target.closest('a')) return;
                     const promo = promotions.find((p) => p.id === btn.dataset.promotionId);
                     if (!promo) return;
                     await setActivePromotion(promo);
                     const modal = bootstrap.Modal.getInstance(document.getElementById('myPromotionsModal'));
                     if (modal) modal.hide();
+                };
+
+                btn.addEventListener('click', handleSelect);
+                btn.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSelect(e);
+                    }
                 });
             });
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
         }
 
         async function openMyPromotions() {
@@ -1537,7 +1611,9 @@
 
                 await setActivePromotion({
                     id: data.promotion_id,
-                    name: data.promotion_name || promotionName
+                    name: data.promotion_name || promotionName,
+                    photo_url: photoUrl,
+                    secret_link: (link && link.trim()) ? link.trim() : null
                 });
                 checkSession();
 

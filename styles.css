@@ -752,12 +752,67 @@ h1, h2, h3, h4, h5, .navbar-brand {
     padding: 14px 16px;
     color: var(--text-main);
     transition: var(--transition);
+    cursor: pointer;
+    width: 100%;
+    display: block;
+    outline: none;
 }
 
 .promotion-list-item:hover,
+.promotion-list-item:focus-visible,
 .promotion-list-item.active {
     border-color: var(--primary-bright);
     background: rgba(124, 58, 237, 0.12);
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+}
+
+.promo-img-container {
+    width: 100%;
+    max-height: 160px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.promo-img-container img {
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+    border-radius: 11px;
+    transition: transform 0.3s ease;
+}
+
+.promotion-list-item:hover .promo-img-container img {
+    transform: scale(1.02);
+}
+
+.promo-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(124, 58, 237, 0.15);
+    color: #a78bfa;
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    max-width: 100%;
+    word-break: break-all;
+}
+
+.promo-link-btn:hover {
+    background: rgba(124, 58, 237, 0.35);
+    color: #c4b5fd;
+    border-color: rgba(196, 181, 253, 0.6);
+    text-decoration: none;
+    transform: translateY(-1px);
 }
 
 .coin-package-badge {
