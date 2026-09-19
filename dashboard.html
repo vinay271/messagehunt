@@ -1320,8 +1320,8 @@
                 }
 
                 const imageHtml = photoUrl ? `
-                    <div class="promo-img-container mb-2">
-                        <img src="${safeHtml(photoUrl)}" alt="${safeHtml(p.name || 'Promotion Banner')}" loading="lazy" onerror="this.parentElement.style.display='none';">
+                    <div class="promo-card-thumb-container">
+                        <img src="${safeHtml(photoUrl)}" alt="${safeHtml(p.name || 'Promotion Banner')}" loading="lazy" class="promo-card-thumb" onerror="this.parentElement.style.display='none';">
                     </div>
                 ` : '';
 
@@ -1329,18 +1329,22 @@
                     <div class="mt-2 pt-1">
                         <a href="${safeHtml(formattedLink)}" target="_blank" rel="noopener noreferrer" class="promo-link-btn" onclick="event.stopPropagation();">
                             <i data-lucide="external-link" style="width:14px; height:14px; flex-shrink:0;"></i>
-                            <span class="text-truncate" style="max-width: 280px; display: inline-block; vertical-align: middle;">${safeHtml(secretLink)}</span>
+                            <span class="text-truncate" style="max-width: 200px; display: inline-block; vertical-align: middle;">${safeHtml(secretLink)}</span>
                         </a>
                     </div>
                 ` : '';
 
                 return `
                     <div role="button" tabindex="0" class="promotion-list-item ${active}" data-promotion-id="${p.id}">
-                        ${imageHtml}
-                        <div class="fw-bold text-white mb-1" style="font-size:1.02rem;">${safeHtml(p.name || 'Untitled')}</div>
-                        <div class="small text-muted">${safeHtml(p.state_code || '—')} · ${(p.total_points || 0).toLocaleString()} PTS · ${p.drop_count || 0} drops</div>
-                        <div class="small text-muted mt-1" style="font-size:0.75rem;">${created}</div>
-                        ${linkHtml}
+                        <div class="d-flex align-items-center justify-content-between gap-3">
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-bold text-white mb-1" style="font-size:1.02rem;">${safeHtml(p.name || 'Untitled')}</div>
+                                <div class="small text-muted">${safeHtml(p.state_code || '—')} · ${(p.total_points || 0).toLocaleString()} PTS · ${p.drop_count || 0} drops</div>
+                                <div class="small text-muted mt-1" style="font-size:0.75rem;">${created}</div>
+                                ${linkHtml}
+                            </div>
+                            ${imageHtml}
+                        </div>
                     </div>
                 `;
             }).join('');
