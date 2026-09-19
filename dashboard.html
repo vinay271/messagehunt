@@ -1563,8 +1563,9 @@
                     const fileExt = file.name.split('.').pop();
                     const filePath = `${userId}/${Date.now()}.${fileExt}`;
 
-                    const { error: uploadError } = await supabaseClient.storage
-                        .from('promotion')
+                    let bucketName = 'promotion';
+                    let { error: uploadError } = await supabaseClient.storage
+                        .from(bucketName)
                         .upload(filePath, file);
 
                     if (uploadError) {
@@ -1574,7 +1575,7 @@
                     }
 
                     const { data: publicData } = supabaseClient.storage
-                        .from('promotion')
+                        .from(bucketName)
                         .getPublicUrl(filePath);
 
                     photoUrl = publicData && publicData.publicUrl ? publicData.publicUrl : null;
